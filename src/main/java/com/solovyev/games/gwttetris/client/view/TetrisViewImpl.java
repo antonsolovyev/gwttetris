@@ -13,10 +13,6 @@ import java.util.Map;
 
 public class TetrisViewImpl  implements TetrisView
 {
-    private static final int FIELD_PADDING = 5;
-    private static final int FIELD_BORDER = 2;
-    private static final int TEXT_PADDING = 1;
-    private static final int MAX_TEXT_SIZE = 12;
     private static final int PREVIEW_WIDTH = 5;
     private static final int PREVIEW_HEIGHT = 5;
     private static final int MAX_CELL_SIZE = 23;
@@ -41,20 +37,19 @@ public class TetrisViewImpl  implements TetrisView
     private Label speedLabel;
     private Label linesLabel;
     private Label piecesLabel;
-
-    private Presenter presenter;
-    private TetrisEngine tetrisEngine;
-
+    
     private int cellSize;
     private boolean isGridShown = false;
     private boolean isPreviewShown = true;
 
+    private Presenter presenter;
+    private TetrisEngine tetrisEngine;
 
     public TetrisViewImpl()
     {
         if(!Canvas.isSupported())
         {
-            throw new RuntimeException("Browser does not support HTML5 canvas!");
+            throw new RuntimeException("Sorry, browser does not support HTML5 canvas, can't continue.");
         }
         
         flexTable = new FlexTable();
@@ -65,7 +60,7 @@ public class TetrisViewImpl  implements TetrisView
         gameCanvas = Canvas.createIfSupported();
         flexTable.setWidget(0, 1, gameCanvas);
 
-        Panel scorePanel = makeScorePanel();
+        Panel scorePanel = makeStatsPanel();
         flexTable.setWidget(1, 0, scorePanel);
 
         Panel controlPanel = makeControlPanel();
@@ -73,37 +68,55 @@ public class TetrisViewImpl  implements TetrisView
         
         flexTable.getFlexCellFormatter().setRowSpan(0, 1, 2);
         flexTable.getFlexCellFormatter().setRowSpan(0, 2, 2);
+        flexTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+        flexTable.getFlexCellFormatter().setHeight(0, 0, String.valueOf(previewCanvas.getCanvasElement().getHeight()));
+        flexTable.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
+        flexTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
         flexTable.getElement().getStyle().setBackgroundColor(BACKGROUND_COLOR);
 
         initInputHandling();
     }
 
-    private Panel makeScorePanel()
+    private Panel makeStatsPanel()
     {
-        VerticalPanel scorePanel = new VerticalPanel();
-        scorePanel.getElement().getStyle().setBackgroundColor("red");
-        scorePanel.setBorderWidth(10);
-        scorePanel.getElement().getStyle().setBorderColor("blue");
-        scoreLabel = new Label("Score: ");
-        scorePanel.add(scoreLabel);
-        speedLabel = new Label("Speed: ");
-        scorePanel.add(speedLabel);
-        linesLabel = new Label("Lines: ");
-        scorePanel.add(linesLabel);
-        piecesLabel = new Label("Pieces: ");
-        scorePanel.add(piecesLabel);
+        VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+//        panel.getElement().getStyle().setBackgroundColor("blue");
+//        panel.getElement().getStyle().setBorderColor("red");
+//        panel.setBorderWidth(10);
 
-        return scorePanel;
+        scoreLabel = new Label();
+        panel.add(makeStatsEntryPanel("Score:", scoreLabel));
+        speedLabel = new Label();
+        panel.add(makeStatsEntryPanel("Speed:", speedLabel));
+        linesLabel = new Label();
+        panel.add(makeStatsEntryPanel("Lines:", linesLabel));
+        piecesLabel = new Label();
+        panel.add(makeStatsEntryPanel("Pieces:", piecesLabel));
+
+        return panel;
+    }
+    
+    private Panel makeStatsEntryPanel(String name, Label valueLabel)
+    {
+        DockPanel panel = new DockPanel();
+        panel.setWidth("100%");
+        panel.add(new Label(name), DockPanel.WEST);
+        valueLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        panel.add(valueLabel, DockPanel.EAST);
+
+        return panel;
     }
     
     private Panel makeControlPanel()
     {
         VerticalPanel controlPanel = new VerticalPanel();
-        controlPanel.getElement().getStyle().setBackgroundColor("blue");
-        controlPanel.setBorderWidth(10);
-        controlPanel.getElement().getStyle().setBorderColor("red");
+//        controlPanel.getElement().getStyle().setBackgroundColor("blue");
+//        controlPanel.getElement().getStyle().setBorderColor("red");
+//        controlPanel.setBorderWidth(10);
 
         final Button startButton = new Button("New game");
+        startButton.setWidth("100%");
         startButton.addClickHandler(new ClickHandler()
         {
             @Override
@@ -116,6 +129,7 @@ public class TetrisViewImpl  implements TetrisView
         controlPanel.add(startButton);
 
         final Button pauseButton = new Button("Pause");
+        pauseButton.setWidth("100%");
         pauseButton.addClickHandler(new ClickHandler()
         {
             @Override
@@ -134,6 +148,19 @@ public class TetrisViewImpl  implements TetrisView
             }
         });
         controlPanel.add(pauseButton);
+
+        final Button highScoreButton = new Button("High Scores");
+        highScoreButton.setWidth("100%");
+        highScoreButton.addClickHandler(new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                presenter.handleHighScoreButton();
+            }
+        });
+        controlPanel.add(highScoreButton);
+        
 
         final CheckBox previewCheckBox = new CheckBox("Show preview");
         previewCheckBox.setValue(true);
@@ -197,8 +224,8 @@ public class TetrisViewImpl  implements TetrisView
 
     private static class Point
     {
-        int x;
-        int y;
+        public int x;
+        public int y;
 
         public Point(int x, int y)
         {
@@ -209,10 +236,18 @@ public class TetrisViewImpl  implements TetrisView
 
     private static class Rectangle
     {
-        int top;
-        int right;
-        int bottom;
-        int left;
+        public int top;
+        public int right;
+        public int bottom;
+        public int left;
+
+        public Rectangle(int left, int top, int right, int bottom)
+        {
+            this.left = left;
+            this.top = top;
+            this.right = right;
+            this.bottom = bottom;
+        }
 
         public int getHeight()
         {
@@ -222,14 +257,6 @@ public class TetrisViewImpl  implements TetrisView
         public int getWidth()
         {
             return right - left;
-        }
-
-        public Rectangle(int left, int top, int right, int bottom)
-        {
-            this.left = left;
-            this.top = top;
-            this.right = right;
-            this.bottom = bottom;
         }
     }
 
@@ -319,13 +346,6 @@ public class TetrisViewImpl  implements TetrisView
         return new Point(x, y);
     };
     
-    private void drawRectangle(Canvas canvas, Rectangle rectangle, String color)
-    {
-        canvas.getContext2d().rect(rectangle.left, rectangle.top, rectangle.getWidth(), rectangle.getHeight());
-        canvas.getContext2d().setFillStyle(color);
-        canvas.getContext2d().fill();
-    }
-
     private void drawCellIntoRectangle(Canvas canvas, Cell cell, Rectangle rectangle)
     {
         Image cellImage = new Image(COLOR_TO_IMAGE.get(cell.getColor().name()));
@@ -370,7 +390,10 @@ public class TetrisViewImpl  implements TetrisView
 
     private void drawStats()
     {
-        // TODO
+        scoreLabel.setText(String.valueOf(tetrisEngine.getScore()));
+        speedLabel.setText(String.valueOf(tetrisEngine.getSpeed()));
+        piecesLabel.setText(String.valueOf(tetrisEngine.getPieceCount()));
+        linesLabel.setText(String.valueOf(tetrisEngine.getLineCount()));
     }
 
     private void drawSea()

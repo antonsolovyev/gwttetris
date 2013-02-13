@@ -1,31 +1,35 @@
 package com.solovyev.games.gwttetris.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.solovyev.games.gwttetris.client.event.RestartEvent;
-import com.solovyev.games.gwttetris.client.event.RestartEventHandler;
-import com.solovyev.games.gwttetris.client.presenter.HelloPresenter;
+import com.solovyev.games.gwttetris.client.event.*;
+import com.solovyev.games.gwttetris.client.presenter.GameOverPresenter;
+import com.solovyev.games.gwttetris.client.presenter.HighScorePresenter;
 import com.solovyev.games.gwttetris.client.presenter.TetrisPresenter;
-import com.solovyev.games.gwttetris.client.view.HelloView;
-import com.solovyev.games.gwttetris.client.view.HelloViewImpl;
-import com.solovyev.games.gwttetris.client.view.TetrisView;
-import com.solovyev.games.gwttetris.client.view.TetrisViewImpl;
+import com.solovyev.games.gwttetris.client.service.HighScoreService;
+import com.solovyev.games.gwttetris.client.service.HighScoreServiceAsync;
+import com.solovyev.games.gwttetris.client.view.*;
+import com.solovyev.games.tetris.TetrisEngine;
 
 public class TetrisApplicationController implements TetrisApplication.Presenter, ValueChangeHandler<String>
 {
+    private static final String TETRIS_TOKEN = "tetris";
     private TetrisApplication tetrisApplication;
     private HandlerManager eventBus;
     private HasWidgets container;
-    private static final String HELLO_TOKEN = "hello";
-    private static final String TETRIS_TOKEN = "tetris";
 
+    private HighScoreServiceAsync highScoreService;
+    
     public TetrisApplicationController(TetrisApplication tetrisApplication, HandlerManager eventBus)
     {
         this.tetrisApplication = tetrisApplication;
         this.eventBus = eventBus;
+        
+        highScoreService = GWT.create(HighScoreService.class);    
         
         tetrisApplication.setPresenter(this);
         
@@ -39,7 +43,6 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
         
         if ("".equals(History.getToken()))
         {
-            // History.newItem(HELLO_TOKEN);
             History.newItem(TETRIS_TOKEN);            
         }
         else
@@ -57,11 +60,7 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
 
         if (token != null)
         {
-            if (token.equals(HELLO_TOKEN))
-            {
-                makeHelloView();
-            }
-            else if(token.equals(TETRIS_TOKEN))
+            if(token.equals(TETRIS_TOKEN))
             {
                 makeTetrisView();
             }
@@ -72,29 +71,50 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
     {
         History.addValueChangeHandler(this);
 
-        eventBus.addHandler(RestartEvent.TYPE, new RestartEventHandler()
+        eventBus.addHandler(GameOverEvent.TYPE, new GameOverEventHandler()
         {
             @Override
-            public void restart(RestartEvent restartEvent)
+            public void handle(GameOverEvent gameOverEvent)
             {
-                System.out.println("===> RestartEvent");
-
-                makeHelloView();                
+                System.out.println("===> GameOverEvent");
+                
+                makeGameOverView(gameOverEvent.getTetrisEngine());
             }
         });
+
+        eventBus.addHandler(ShowHighScoresEvent.TYPE, new ShowHighScoresEventHandler()
+        {
+            @Override
+            public void showHighScores(ShowHighScoresEvent event)
+            {
+                System.out.println("===> HighScoreEvent");
+
+                makeHighScoreView();
+            }
+        });
+
     }
     
-    private void makeHelloView()
-    {
-        HelloView helloView = new HelloViewImpl();
-        HelloPresenter helloPresenter = new HelloPresenter(helloView, eventBus);
-        helloPresenter.display(container);
-    }
-
     private void makeTetrisView()
     {
         TetrisView tetrisView = new TetrisViewImpl();
         TetrisPresenter tetrisPresenter = new TetrisPresenter(tetrisView, eventBus);
         tetrisPresenter.display(container);
+    }
+    
+    private void makeGameOverView(TetrisEngine tetrisEngine)
+    {
+        GameOverView gameOverView = new GameOverViewImpl();
+        GameOverView.Presenter gameOverPresenter = new GameOverPresenter(gameOverView, eventBus,
+                tetrisEngine, highScoreService);
+        gameOverPresenter.display(container);
+    }
+    
+    private void makeHighScoreView()
+    {
+        HighScoreView highScoreView = new HighScoreViewImpl();
+        HighScoreView.Presenter highScorePresenter = new HighScorePresenter(highScoreView, eventBus,
+            highScoreService);
+        highScorePresenter.display(container);
     }
 }

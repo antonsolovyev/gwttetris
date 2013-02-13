@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+  <g:DialogBox autoHide="true" modal="true">  
+    <g:HTMLPanel>
+        A high score achieved! Please enter your name below:
+        <hr/>
+        <g:TextBox ui:field='nameTextBox' focus="true"/>
+        <hr/>
+        <g:Button ui:field='okButton'>OK</g:Button>
+        <g:Button ui:field='cancelButton'>Cancel</g:Button>
+    </g:HTMLPanel>
+  </g:DialogBox>
+
+</ui:UiBinder>
