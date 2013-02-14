@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+    <bean id="dataSource" destroy-method="close" class="org.h2.jdbcx.JdbcDataSource">
+        <property name="URL" value="jdbc:h2:tcp://127.0.0.1/~/tmp/highScore/highScore"/>
+        <property name="user" value="sa"/>
+        <property name="password" value="sa"/>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <bean id="highScoreDao" class="com.solovyev.games.gwttetris.server.dao.HighScoreDaoImpl">
+        <constructor-arg index="0">
+            <ref bean="dataSource"/>
+        </constructor-arg>    
+    </bean>
+</beans>

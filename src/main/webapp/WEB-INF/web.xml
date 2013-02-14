@@ -5,15 +5,25 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
-    <!-- Servlets -->
+    <!-- Create root WebApplicationContext from applicationContext.xml -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+
+    <!-- DispatcherServlet will create its own child WebApplicationContext -->
     <servlet>
-        <servlet-name>highScoreServiceImpl</servlet-name>
-        <servlet-class>com.solovyev.games.gwttetris.server.HighScoreServiceImpl</servlet-class>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
+
     <servlet-mapping>
-        <servlet-name>highScoreServiceImpl</servlet-name>
+        <servlet-name>dispatcher</servlet-name>
         <url-pattern>/tetrisapplication/highScoreService</url-pattern>
     </servlet-mapping>
 
