@@ -13,5 +13,5 @@ public interface HighScoreService extends RemoteService
      
     public boolean isHighScore(Integer value);
     
-    public boolean saveHighScore(HighScore highScore);
+    public void saveHighScore(HighScore highScore);
 }

@@ -25,7 +25,7 @@ public interface HighScoreServiceAsync
      * GWT-RPC service  asynchronous (client-side) interface
      * @see com.solovyev.games.gwttetris.client.service.HighScoreService
      */
-    void saveHighScore( com.solovyev.games.gwttetris.shared.HighScore highScore, AsyncCallback<java.lang.Boolean> callback );
+    void saveHighScore( com.solovyev.games.gwttetris.shared.HighScore highScore, AsyncCallback<Void> callback );
 
 
     /**
@@ -41,7 +41,7 @@ public interface HighScoreServiceAsync
             {
                 instance = (HighScoreServiceAsync) GWT.create( HighScoreService.class );
                 ServiceDefTarget target = (ServiceDefTarget) instance;
-                target.setServiceEntryPoint( GWT.getModuleBaseURL() + "HighScoreService" );
+                target.setServiceEntryPoint( GWT.getModuleBaseURL() + "highScoreService" );
             }
             return instance;
         }

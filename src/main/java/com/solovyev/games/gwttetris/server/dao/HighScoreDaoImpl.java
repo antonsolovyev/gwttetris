@@ -18,16 +18,11 @@ public class HighScoreDaoImpl implements HighScoreDao
 
     private static final int MAX_HIGH_SCORE_RECORDS = 10;
 
-    private JdbcDataSource jdbcDataSource;
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
     public HighScoreDaoImpl(JdbcDataSource jdbcDataSource)
     {
-        this.jdbcDataSource = jdbcDataSource;
-
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcDataSource);
-
-        logger.fine("instantiated: " + this);
     }
 
     @Override
@@ -46,8 +41,6 @@ public class HighScoreDaoImpl implements HighScoreDao
             };
         });
 
-        logger.fine("highScores: " + highScores);
-
         return highScores;
     }
 
@@ -58,26 +51,19 @@ public class HighScoreDaoImpl implements HighScoreDao
         Long count = (Long) map.get("COUNT");
         Integer min = (Integer) map.get("MIN");
 
-        logger.info("count: " + count + "min: " + min);
-
         boolean res = false;
-        if(count < MAX_HIGH_SCORE_RECORDS || (value != null && value > min))
+        if(count < MAX_HIGH_SCORE_RECORDS || (min != null && value > min))
         {
             res = true;
         }
-
-        logger.info("res: " + res);
-
+        
         return res;
     }
 
     @Override
     public void saveHighScore(HighScore highScore)
     {
-        logger.info("===> saveHighScore(), highScore: " + highScore);
-
         simpleJdbcTemplate.update("insert into high_score (name, score, date) values (?, ?, ?)",
                 highScore.getName(), highScore.getValue(), highScore.getDate());
     }
-
 }

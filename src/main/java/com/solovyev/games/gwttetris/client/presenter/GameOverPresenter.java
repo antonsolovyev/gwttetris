@@ -9,6 +9,8 @@ import com.solovyev.games.gwttetris.client.view.GameOverView;
 import com.solovyev.games.gwttetris.shared.HighScore;
 import com.solovyev.games.tetris.TetrisEngine;
 
+import java.util.Date;
+
 public class GameOverPresenter implements GameOverView.Presenter
 {
     private GameOverView gameOverView;
@@ -42,7 +44,20 @@ public class GameOverPresenter implements GameOverView.Presenter
     {
         gameOverView.hideNameInputDialog();
         
-        eventBus.fireEvent(new ShowHighScoresEvent());
+        highScoreService.saveHighScore(new HighScore(name, tetrisEngine.getScore(), new Date()), new AsyncCallback<Void>()
+        {
+            @Override
+            public void onFailure(Throwable caught)
+            {
+                throw new RuntimeException("Problem saving high score: ", caught);
+            }
+
+            @Override
+            public void onSuccess(Void v)
+            {
+                eventBus.fireEvent(new ShowHighScoresEvent());
+            }
+        });        
     }
     
     @Override
@@ -68,14 +83,12 @@ public class GameOverPresenter implements GameOverView.Presenter
             @Override
             public void onFailure(Throwable caught)
             {
-                System.out.println("===> oops: " + caught);
-                throw new RuntimeException("Unable to contact high score service", caught);
+                throw new RuntimeException("Unable to check whether the result is a high score", caught);
             }
 
             @Override
             public void onSuccess(Boolean result)
             {
-                System.out.println("===> result: " + result);
                 if(result)
                 {
                     gameOverView.showNameInputDialog();
