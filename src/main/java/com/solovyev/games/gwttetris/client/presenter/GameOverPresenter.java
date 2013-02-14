@@ -27,8 +27,6 @@ public class GameOverPresenter implements GameOverView.Presenter
         this.highScoreService = highScoreService;
         
         gameOverView.setPresenter(this);
-        
-        registerHandlers();
     }
     
     @Override
@@ -70,10 +68,6 @@ public class GameOverPresenter implements GameOverView.Presenter
     public void display(HasWidgets container)
     {
         gameOverView.showGameOverDialog();
-    }
-    
-    private void registerHandlers()
-    {
     }
     
     private void checkHighScore()

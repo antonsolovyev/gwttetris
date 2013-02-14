@@ -72,8 +72,6 @@ public class TetrisPresenter implements TetrisView.Presenter
         tetrisView.setPresenter(this);
         
         tetrisEngine.start();
-
-        registerEventHandlers();
     }
     
     @Override
@@ -93,9 +91,5 @@ public class TetrisPresenter implements TetrisView.Presenter
     public TetrisEngine getTetrisEngine()
     {
         return tetrisEngine;
-    }
-    
-    private void registerEventHandlers()
-    {
     }
 }
