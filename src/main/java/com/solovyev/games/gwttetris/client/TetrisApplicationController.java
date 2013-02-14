@@ -56,8 +56,6 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
     {
         String token = event.getValue();
 
-        System.out.println("===> Browser history event, token: " + event.getValue());
-
         if (token != null)
         {
             if(token.equals(TETRIS_TOKEN))
@@ -76,8 +74,6 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
             @Override
             public void handle(GameOverEvent gameOverEvent)
             {
-                System.out.println("===> GameOverEvent");
-                
                 makeGameOverView(gameOverEvent.getTetrisEngine());
             }
         });
@@ -87,8 +83,6 @@ public class TetrisApplicationController implements TetrisApplication.Presenter,
             @Override
             public void showHighScores(ShowHighScoresEvent event)
             {
-                System.out.println("===> HighScoreEvent");
-
                 makeHighScoreView();
             }
         });
