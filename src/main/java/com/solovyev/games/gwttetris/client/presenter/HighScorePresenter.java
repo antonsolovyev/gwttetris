@@ -7,11 +7,14 @@ import com.solovyev.games.gwttetris.client.service.HighScoreServiceAsync;
 import com.solovyev.games.gwttetris.client.view.HighScoreView;
 import com.solovyev.games.gwttetris.shared.HighScore;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HighScorePresenter implements HighScoreView.Presenter
 {
+    private static final Logger logger = Logger.getLogger(HighScorePresenter.class.getName());
+    
     private HighScoreView highScoreView;
     private HandlerManager handlerManager;
     private HighScoreServiceAsync highScoreService;
@@ -36,6 +39,8 @@ public class HighScorePresenter implements HighScoreView.Presenter
             @Override
             public void onSuccess(List<HighScore> result)
             {
+                logger.log(Level.FINE, "res: " + result);
+                
                 HighScorePresenter.this.highScoreView.setHighScores(result);
             }
         });

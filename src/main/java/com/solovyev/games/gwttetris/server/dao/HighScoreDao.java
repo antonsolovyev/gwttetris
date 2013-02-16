@@ -9,12 +9,12 @@ import java.util.List;
 
 public interface HighScoreDao
 {
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Transactional(readOnly = true)
     public List<HighScore> getHighScores();
 
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-    public boolean isHighScore(Integer value);
+    @Transactional(readOnly = true)
+    public boolean isHighScore(Integer score);
 
-    @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
+    @Transactional(readOnly = false)
     public void saveHighScore(HighScore highScore);
 }

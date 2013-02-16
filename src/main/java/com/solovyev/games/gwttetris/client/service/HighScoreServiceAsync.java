@@ -18,7 +18,7 @@ public interface HighScoreServiceAsync
      * GWT-RPC service  asynchronous (client-side) interface
      * @see com.solovyev.games.gwttetris.client.service.HighScoreService
      */
-    void isHighScore( java.lang.Integer value, AsyncCallback<java.lang.Boolean> callback );
+    void isHighScore( java.lang.Integer score, AsyncCallback<java.lang.Boolean> callback );
 
 
     /**

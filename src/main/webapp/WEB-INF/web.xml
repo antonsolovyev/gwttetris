@@ -32,4 +32,14 @@
         <welcome-file>TetrisApplication.html</welcome-file>
     </welcome-file-list>
 
+    <!-- Logging -->
+    <servlet>
+        <servlet-name>remoteLogging</servlet-name>
+        <servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>remoteLogging</servlet-name>
+        <url-pattern>/tetrisapplication/remote_logging</url-pattern>
+    </servlet-mapping>
 </web-app>

@@ -1,9 +1,11 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-  <g:PopupPanel>
+  <g:PopupPanel modal="true">
       <g:HTMLPanel>
           <h1>High Scores</h1>
+          <hr/>
+          <g:FlexTable ui:field='highScoreTable'/>
           <hr/>
           <g:Button ui:field='okButton'>Ok</g:Button>
       </g:HTMLPanel>

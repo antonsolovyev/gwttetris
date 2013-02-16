@@ -1,7 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-  <g:DialogBox autoHide="true" modal="true">  
+  <g:DialogBox modal="true">  
     <g:HTMLPanel>
         Game over!
         <hr/>

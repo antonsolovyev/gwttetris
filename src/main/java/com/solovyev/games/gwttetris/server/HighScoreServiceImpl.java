@@ -4,6 +4,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.solovyev.games.gwttetris.client.service.HighScoreService;
 import com.solovyev.games.gwttetris.server.dao.HighScoreDao;
 import com.solovyev.games.gwttetris.shared.HighScore;
+import org.apache.log4j.Logger;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
@@ -12,7 +13,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class HighScoreServiceImpl extends RemoteServiceServlet implements HighScoreService, Controller, ServletContextAware
 {
@@ -25,8 +25,6 @@ public class HighScoreServiceImpl extends RemoteServiceServlet implements HighSc
     public HighScoreServiceImpl(HighScoreDao highScoreDao)
     {
         this.highScoreDao = highScoreDao;
-        
-        logger.fine("instantiated: " + this);    
     }
     
     @Override
@@ -36,9 +34,9 @@ public class HighScoreServiceImpl extends RemoteServiceServlet implements HighSc
     }
 
     @Override
-    public boolean isHighScore(Integer value)
+    public boolean isHighScore(Integer score)
     {
-        return highScoreDao.isHighScore(value);
+        return highScoreDao.isHighScore(score);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class GameOverPresenter implements GameOverView.Presenter
             @Override
             public void onFailure(Throwable caught)
             {
-                throw new RuntimeException("Problem saving high score: ", caught);
+                throw new RuntimeException("Problem saving high score", caught);
             }
 
             @Override

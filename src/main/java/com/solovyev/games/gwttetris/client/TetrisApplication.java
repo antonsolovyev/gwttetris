@@ -1,28 +1,46 @@
 package com.solovyev.games.gwttetris.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.RootPanel;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class TetrisApplication implements EntryPoint
 {
+    private static final Logger logger = Logger.getLogger(TetrisApplication.class.getName());
+    
     private Presenter presenter;
     
     public void onModuleLoad()
     {
-        HandlerManager eventBus = new HandlerManager(null);
-        
-        TetrisApplicationController tetrisApplicationController = new TetrisApplicationController(this, eventBus);
-        
-        tetrisApplicationController.display(RootPanel.get());
+        setUngaughtExceptionHandler();
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand()
+        {
+            @Override
+            public void execute()
+            {
+                init();
+            }
+        });
     }
 
+    private void init()
+    {
+        HandlerManager eventBus = new HandlerManager(null);
+
+        TetrisApplicationController tetrisApplicationController = new TetrisApplicationController(this, eventBus);
+
+        tetrisApplicationController.display(RootPanel.get());
+    }
+    
     public void setPresenter(Presenter presenter)
     {
         this.presenter = presenter;
@@ -31,5 +49,18 @@ public class TetrisApplication implements EntryPoint
     public interface Presenter
     {
         public void display(HasWidgets container);
-    }    
+    }
+    
+    private void setUngaughtExceptionHandler()
+    {
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler()
+        {
+            public void onUncaughtException(Throwable e)
+            {
+                logger.log(Level.SEVERE, "exception in client code", e);
+
+                Window.alert("Error: " + e);
+            }
+        });
+    }
 }

@@ -7,13 +7,13 @@ public class HighScore implements Serializable
 {
     private static final long serialVersionUID = 1L;
     private String name;
-    private Integer value;
+    private Integer score;
     private Date date;
     
     public HighScore(String name, Integer score, Date date)
     {
         this.name = name;
-        this.value = score;
+        this.score = score;
         this.date = date;
     }
     
@@ -26,9 +26,9 @@ public class HighScore implements Serializable
         return name;
     }
 
-    public Integer getValue()
+    public Integer getScore()
     {
-        return value;
+        return score;
     }
 
     public Date getDate()
@@ -46,7 +46,7 @@ public class HighScore implements Serializable
 
         if (date != null ? !date.equals(that.date) : that.date != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (score != null ? !score.equals(that.score) : that.score != null) return false;
 
         return true;
     }
@@ -55,7 +55,7 @@ public class HighScore implements Serializable
     public int hashCode()
     {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (score != null ? score.hashCode() : 0);
         result = 31 * result + (date != null ? date.hashCode() : 0);
         return result;
     }
@@ -65,7 +65,7 @@ public class HighScore implements Serializable
     {
         return "HighScore{" +
                 "name='" + name + '\'' +
-                ", value=" + value +
+                ", score=" + score +
                 ", date=" + date +
                 '}';
     }
