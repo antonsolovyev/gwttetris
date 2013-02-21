@@ -1,17 +1,19 @@
 package com.solovyev.games.gwttetris.server.dao;
 
-import com.solovyev.games.gwttetris.shared.HighScore;
-import org.apache.log4j.Logger;
-import org.h2.jdbcx.JdbcDataSource;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.solovyev.games.gwttetris.shared.HighScore;
+
+import org.apache.log4j.Logger;
+import org.h2.jdbcx.JdbcDataSource;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+
 
 public class HighScoreDaoImpl implements HighScoreDao
 {
@@ -29,44 +31,47 @@ public class HighScoreDaoImpl implements HighScoreDao
     @Override
     public List<HighScore> getHighScores()
     {
-        List<HighScore> highScores = simpleJdbcTemplate.query("select * from high_score order by score desc, date desc;", new ParameterizedRowMapper<HighScore>()
-        {
-            @Override
-            public HighScore mapRow(ResultSet rs, int rowNum) throws SQLException
-            {
-                String name = rs.getString("NAME");
-                Integer score = rs.getInt("SCORE");
-                Date date = rs.getDate("DATE");
+        List<HighScore> highScores = simpleJdbcTemplate.query(
+                "select * from high_score order by score desc, date desc;", new ParameterizedRowMapper<HighScore>()
+                {
+                    @Override
+                    public HighScore mapRow(ResultSet rs, int rowNum) throws SQLException
+                    {
+                        String name = rs.getString("NAME");
+                        Integer score = rs.getInt("SCORE");
+                        Date date = rs.getDate("DATE");
 
-                return new HighScore(name, score, date);
-            };
-        });
+                        return new HighScore(name, score, date);
+                    }
+                    ;
+                });
 
         // This trips silly GWT serialization.
         // List<HighScore> res = highScores.subList(0, MAX_HIGH_SCORE_RECORDS);
         // Workaround
         List<HighScore> res = new ArrayList<HighScore>();
-        for(HighScore h : highScores)
+        for (HighScore h : highScores)
         {
             res.add(h);
         }
-        
+
         return res;
     }
 
     @Override
     public boolean isHighScore(Integer score)
     {
-        Map<String, Object> map = simpleJdbcTemplate.queryForMap("select count(*) as count, min(score) as min from high_score;");
+        Map<String, Object> map = simpleJdbcTemplate.queryForMap(
+                "select count(*) as count, min(score) as min from high_score;");
         Long count = (Long) map.get("COUNT");
         Integer min = (Integer) map.get("MIN");
 
         boolean res = false;
-        if(count < MAX_HIGH_SCORE_RECORDS || (min != null && score > min))
+        if ((count < MAX_HIGH_SCORE_RECORDS) || ((min != null) && (score > min)))
         {
             res = true;
         }
-        
+
         return res;
     }
 

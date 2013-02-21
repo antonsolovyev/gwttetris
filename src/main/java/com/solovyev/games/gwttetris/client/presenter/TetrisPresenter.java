@@ -11,9 +11,10 @@ import com.solovyev.games.tetris.TetrisEngine;
 import com.solovyev.games.tetris.TetrisEvent;
 import com.solovyev.games.tetris.TetrisListener;
 
+
 public class TetrisPresenter implements TetrisView.Presenter
 {
-    private TetrisView tetrisView;    
+    private TetrisView tetrisView;
     private HandlerManager eventBus;
     private TetrisEngine tetrisEngine;
 
@@ -23,63 +24,64 @@ public class TetrisPresenter implements TetrisView.Presenter
         this.eventBus = eventBus;
 
         tetrisEngine = new AbstractTetrisEngine(10, 20)
-        {
-            private Timer timer;
-
-            @Override
-            protected void startTimer()
             {
-                timer = new Timer() {
-                    @Override
-                    public void run()
-                    {
-                        timerEvent();
-                    }
-                };
+                private Timer timer;
 
-                timer.scheduleRepeating(getTimerTick());
-            }
-
-            @Override
-            protected void stopTimer()
-            {
-                if(timer != null)
+                @Override
+                protected void startTimer()
                 {
-                    timer.cancel();
-                    timer = null;
+                    timer = new Timer()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                timerEvent();
+                            }
+                        };
+
+                    timer.scheduleRepeating(getTimerTick());
                 }
-            }
-        };
+
+                @Override
+                protected void stopTimer()
+                {
+                    if (timer != null)
+                    {
+                        timer.cancel();
+                        timer = null;
+                    }
+                }
+            };
 
         tetrisEngine.addTetrisListener(new TetrisListener()
-        {
-            private TetrisEngine.GameState previousGameState;
-            
-            @Override
-            public void stateChanged(TetrisEvent tetrisEvent)
             {
-                if(tetrisEngine.getGameState() == TetrisEngine.GameState.GAMEOVER &&
-                        tetrisEngine.getGameState() != previousGameState)
+                private TetrisEngine.GameState previousGameState;
+
+                @Override
+                public void stateChanged(TetrisEvent tetrisEvent)
                 {
-                    TetrisPresenter.this.eventBus.fireEvent(new GameOverEvent(tetrisEngine));
+                    if ((tetrisEngine.getGameState() == TetrisEngine.GameState.GAMEOVER) &&
+                            (tetrisEngine.getGameState() != previousGameState))
+                    {
+                        TetrisPresenter.this.eventBus.fireEvent(new GameOverEvent(tetrisEngine));
+                    }
+                    previousGameState = tetrisEngine.getGameState();
+
+                    TetrisPresenter.this.tetrisView.refresh();
                 }
-                previousGameState = tetrisEngine.getGameState();
-                
-                TetrisPresenter.this.tetrisView.refresh();
-            }
-        });
+            });
 
         tetrisView.setPresenter(this);
-        
+
         tetrisEngine.start();
     }
-    
+
     @Override
     public void handleHighScoreButton()
     {
         eventBus.fireEvent(new ShowHighScoresEvent());
     }
-    
+
     @Override
     public void display(HasWidgets container)
     {

@@ -1,11 +1,11 @@
 package com.solovyev.games.gwttetris.server.dao;
 
+import java.util.List;
+
 import com.solovyev.games.gwttetris.shared.HighScore;
 
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 public interface HighScoreDao
 {

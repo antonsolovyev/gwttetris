@@ -3,22 +3,23 @@ package com.solovyev.games.gwttetris.shared;
 import java.io.Serializable;
 import java.util.Date;
 
+
 public class HighScore implements Serializable
 {
     private static final long serialVersionUID = 1L;
     private String name;
     private Integer score;
     private Date date;
-    
+
     public HighScore(String name, Integer score, Date date)
     {
         this.name = name;
         this.score = score;
         this.date = date;
     }
-    
+
     private HighScore()
-    {        
+    {
     }
 
     public String getName()
@@ -39,14 +40,29 @@ public class HighScore implements Serializable
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+        {
+            return true;
+        }
+        if ((o == null) || (getClass() != o.getClass()))
+        {
+            return false;
+        }
 
         HighScore that = (HighScore) o;
 
-        if (date != null ? !date.equals(that.date) : that.date != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (score != null ? !score.equals(that.score) : that.score != null) return false;
+        if ((date != null) ? (!date.equals(that.date)) : (that.date != null))
+        {
+            return false;
+        }
+        if ((name != null) ? (!name.equals(that.name)) : (that.name != null))
+        {
+            return false;
+        }
+        if ((score != null) ? (!score.equals(that.score)) : (that.score != null))
+        {
+            return false;
+        }
 
         return true;
     }
@@ -54,9 +70,10 @@ public class HighScore implements Serializable
     @Override
     public int hashCode()
     {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (score != null ? score.hashCode() : 0);
-        result = 31 * result + (date != null ? date.hashCode() : 0);
+        int result = (name != null) ? name.hashCode() : 0;
+        result = (31 * result) + ((score != null) ? score.hashCode() : 0);
+        result = (31 * result) + ((date != null) ? date.hashCode() : 0);
+
         return result;
     }
 
@@ -64,9 +81,9 @@ public class HighScore implements Serializable
     public String toString()
     {
         return "HighScore{" +
-                "name='" + name + '\'' +
-                ", score=" + score +
-                ", date=" + date +
-                '}';
+            "name='" + name + '\'' +
+            ", score=" + score +
+            ", date=" + date +
+            '}';
     }
 }

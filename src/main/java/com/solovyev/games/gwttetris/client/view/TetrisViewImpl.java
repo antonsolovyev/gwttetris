@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
