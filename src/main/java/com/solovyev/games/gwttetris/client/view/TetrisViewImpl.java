@@ -1,43 +1,57 @@
 package com.solovyev.games.gwttetris.client.view;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.solovyev.games.tetris.*;
 
-import java.util.HashMap;
-import java.util.Map;
 
-
-public class TetrisViewImpl  implements TetrisView
+public class TetrisViewImpl implements TetrisView
 {
     private static final int PREVIEW_WIDTH = 5;
     private static final int PREVIEW_HEIGHT = 5;
-    private static final int MAX_CELL_SIZE = 23;
+    private static final double SCREEN_SIZE_RATIO = 0.75;
     private static final String GRID_COLOR = "#404040";
     private static final String FIELD_COLOR = "black";
     private static final String BACKGROUND_COLOR = "gray";
     private static final Map<String, String> COLOR_TO_IMAGE = new HashMap<String, String>()
-    {{
-            put(Cell.Color.CYAN.name(), "cell_cyan.png");
-            put(Cell.Color.BLUE.name(), "cell_blue.png");
-            put(Cell.Color.ORANGE.name(), "cell_orange.png");
-            put(Cell.Color.YELLOW.name(), "cell_yellow.png");
-            put(Cell.Color.GREEN.name(), "cell_green.png");
-            put(Cell.Color.PURPLE.name(), "cell_magenta.png");
-            put(Cell.Color.RED.name(), "cell_red.png");
-    }};
-    
-    private FlexTable flexTable;
+        {
+
+            {
+                put(Cell.Color.CYAN.name(), "cell_cyan.png");
+                put(Cell.Color.BLUE.name(), "cell_blue.png");
+                put(Cell.Color.ORANGE.name(), "cell_orange.png");
+                put(Cell.Color.YELLOW.name(), "cell_yellow.png");
+                put(Cell.Color.GREEN.name(), "cell_green.png");
+                put(Cell.Color.PURPLE.name(), "cell_magenta.png");
+                put(Cell.Color.RED.name(), "cell_red.png");
+            }
+        };
+
+    private Panel mainPanel;
     private Canvas gameCanvas;
     private Canvas previewCanvas;
     private Label scoreLabel;
     private Label speedLabel;
     private Label linesLabel;
     private Label piecesLabel;
-    
+    private Button pauseButton;
+    private Button startButton;
+    private Button highScoreButton;
+    private CheckBox previewCheckBox;
+    private CheckBox gridCheckBox;
+
     private int cellSize;
     private boolean isGridShown = false;
     private boolean isPreviewShown = true;
@@ -47,164 +61,204 @@ public class TetrisViewImpl  implements TetrisView
 
     public TetrisViewImpl()
     {
-        if(!Canvas.isSupported())
+        if (!Canvas.isSupported())
         {
             throw new RuntimeException("Sorry, browser does not support HTML5 canvas, can't continue.");
         }
-        
-        flexTable = new FlexTable();
+
+        FlexTable flexTable = makeFlexTable();
+
+        mainPanel = makeMainPanel(flexTable);
+
+        initInputHandling2();
+
+    }
+
+    private Panel makeMainPanel(Widget widget)
+    {
+        VerticalPanel res = new VerticalPanel();
+        RootPanel.get().getElement().getStyle().setMargin(0, Style.Unit.PX);
+        RootPanel.get().getElement().getStyle().setPadding(0, Style.Unit.PX);
+        res.setWidth("100%");
+        res.add(widget);
+        res.setCellHorizontalAlignment(widget, HasHorizontalAlignment.ALIGN_CENTER);
+        res.setCellVerticalAlignment(widget, HasVerticalAlignment.ALIGN_MIDDLE);
+        res.getElement().getStyle().setHeight(Window.getClientHeight(), Style.Unit.PX);
+
+        return res;
+    }
+
+    private FlexTable makeFlexTable()
+    {
+        FlexTable res = new FlexTable();
 
         previewCanvas = Canvas.createIfSupported();
-        flexTable.setWidget(0, 0, previewCanvas);
+        res.setWidget(0, 0, previewCanvas);
 
         gameCanvas = Canvas.createIfSupported();
-        flexTable.setWidget(0, 1, gameCanvas);
+        res.setWidget(0, 1, gameCanvas);
 
         Panel scorePanel = makeStatsPanel();
-        flexTable.setWidget(1, 0, scorePanel);
+        res.setWidget(1, 0, scorePanel);
 
         Panel controlPanel = makeControlPanel();
-        flexTable.setWidget(0, 2, controlPanel);
-        
-        flexTable.getFlexCellFormatter().setRowSpan(0, 1, 2);
-        flexTable.getFlexCellFormatter().setRowSpan(0, 2, 2);
-        flexTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-        flexTable.getFlexCellFormatter().setHeight(0, 0, String.valueOf(previewCanvas.getCanvasElement().getHeight()));
-        flexTable.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
-        flexTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        flexTable.getElement().getStyle().setBackgroundColor(BACKGROUND_COLOR);
+        res.setWidget(0, 2, controlPanel);
 
-        initInputHandling();
+        res.getFlexCellFormatter().setRowSpan(0, 1, 2);
+        res.getFlexCellFormatter().setRowSpan(0, 2, 2);
+        res.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+        res.getFlexCellFormatter().setHeight(0, 0, String.valueOf(previewCanvas.getCanvasElement().getHeight()));
+        res.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
+        res.getFlexCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
+        res.getElement().getStyle().setBackgroundColor(BACKGROUND_COLOR);
+
+        return res;
     }
 
     private Panel makeStatsPanel()
     {
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
+        VerticalPanel res = new VerticalPanel();
+        res.setWidth("100%");
 //        panel.getElement().getStyle().setBackgroundColor("blue");
 //        panel.getElement().getStyle().setBorderColor("red");
 //        panel.setBorderWidth(10);
 
         scoreLabel = new Label();
-        panel.add(makeStatsEntryPanel("Score:", scoreLabel));
+        res.add(makeStatsEntryPanel("Score:", scoreLabel));
         speedLabel = new Label();
-        panel.add(makeStatsEntryPanel("Speed:", speedLabel));
+        res.add(makeStatsEntryPanel("Speed:", speedLabel));
         linesLabel = new Label();
-        panel.add(makeStatsEntryPanel("Lines:", linesLabel));
+        res.add(makeStatsEntryPanel("Lines:", linesLabel));
         piecesLabel = new Label();
-        panel.add(makeStatsEntryPanel("Pieces:", piecesLabel));
+        res.add(makeStatsEntryPanel("Pieces:", piecesLabel));
 
-        return panel;
+        return res;
     }
-    
+
     private Panel makeStatsEntryPanel(String name, Label valueLabel)
     {
-        DockPanel panel = new DockPanel();
-        panel.setWidth("100%");
-        panel.add(new Label(name), DockPanel.WEST);
+        DockPanel res = new DockPanel();
+        res.setWidth("100%");
+        res.add(new Label(name), DockPanel.WEST);
         valueLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        panel.add(valueLabel, DockPanel.EAST);
+        res.add(valueLabel, DockPanel.EAST);
 
-        return panel;
+        return res;
     }
-    
+
     private Panel makeControlPanel()
     {
-        VerticalPanel controlPanel = new VerticalPanel();
+        VerticalPanel res = new VerticalPanel();
 //        controlPanel.getElement().getStyle().setBackgroundColor("blue");
 //        controlPanel.getElement().getStyle().setBorderColor("red");
 //        controlPanel.setBorderWidth(10);
 
-        final Button startButton = new Button("New game");
+        startButton = new Button("New game");
         startButton.setWidth("100%");
         startButton.addClickHandler(new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
             {
-                tetrisEngine.stop();
-                tetrisEngine.start();
-            }
-        });
-        controlPanel.add(startButton);
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    tetrisEngine.stop();
+                    tetrisEngine.start();
 
-        final Button pauseButton = new Button("Pause");
+                    pauseButton.setText("Pause");
+
+                    forceDefaultFocus(startButton);
+                }
+            });
+        res.add(startButton);
+
+        pauseButton = new Button("Pause");
         pauseButton.setWidth("100%");
         pauseButton.addClickHandler(new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
             {
-                if(tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
+                @Override
+                public void onClick(ClickEvent event)
                 {
-                    pauseButton.setText("Pause");
-                    tetrisEngine.resume();
-                }
-                else if(tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
-                {
-                    pauseButton.setText("Resume");
-                    tetrisEngine.pause();
-                }
-            }
-        });
-        controlPanel.add(pauseButton);
+                    if (tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
+                    {
+                        pauseButton.setText("Pause");
+                        tetrisEngine.resume();
+                    }
+                    else if (tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
+                    {
+                        pauseButton.setText("Resume");
+                        tetrisEngine.pause();
+                    }
 
-        final Button highScoreButton = new Button("High Scores");
+                    forceDefaultFocus(pauseButton);
+                }
+            });
+        res.add(pauseButton);
+
+        highScoreButton = new Button("High Scores");
         highScoreButton.setWidth("100%");
         highScoreButton.addClickHandler(new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
             {
-                presenter.handleHighScoreButton();
-            }
-        });
-        controlPanel.add(highScoreButton);
-        
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    presenter.handleHighScoreButton();
 
-        final CheckBox previewCheckBox = new CheckBox("Show preview");
+                    forceDefaultFocus(highScoreButton);
+                }
+            });
+        res.add(highScoreButton);
+
+        previewCheckBox = new CheckBox("Show preview");
         previewCheckBox.setValue(true);
         previewCheckBox.addClickHandler(new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
             {
-                if(previewCheckBox.getValue())
+                @Override
+                public void onClick(ClickEvent event)
                 {
-                    isPreviewShown = true;
-                }
-                else
-                {
-                    isPreviewShown = false;
-                }
-                refresh();
-            }
-        });
-        controlPanel.add(previewCheckBox);
+                    if (previewCheckBox.getValue())
+                    {
+                        isPreviewShown = true;
+                    }
+                    else
+                    {
+                        isPreviewShown = false;
+                    }
+                    refresh();
 
-        final CheckBox gridCheckBox = new CheckBox("Show grid");
+                    forceDefaultFocus(previewCheckBox);
+                }
+            });
+        res.add(previewCheckBox);
+
+        gridCheckBox = new CheckBox("Show grid");
         gridCheckBox.setValue(false);
         gridCheckBox.addClickHandler(new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
             {
-                if(gridCheckBox.getValue())
+                @Override
+                public void onClick(ClickEvent event)
                 {
-                    isGridShown = true;
+                    if (gridCheckBox.getValue())
+                    {
+                        isGridShown = true;
+                    }
+                    else
+                    {
+                        isGridShown = false;
+                    }
+                    refresh();
+
+                    forceDefaultFocus(gridCheckBox);
                 }
-                else
-                {
-                    isGridShown = false;
-                }
-                refresh();
-            }
-        });
-        controlPanel.add(gridCheckBox);
-        
-        return controlPanel;
+            });
+        res.add(gridCheckBox);
+
+        return res;
     }
-    
+
+    private void forceDefaultFocus(Focusable focusable)
+    {
+        focusable.setFocus(false);
+    }
+
     @Override
     public void setPresenter(Presenter presenter)
     {
@@ -219,7 +273,298 @@ public class TetrisViewImpl  implements TetrisView
     @Override
     public Widget asWidget()
     {
-        return flexTable;
+        return mainPanel;
+    }
+
+    private int getCellSize()
+    {
+        double res = Math.min(
+                Window.getClientHeight() * SCREEN_SIZE_RATIO / tetrisEngine.getHeight(),
+                Window.getClientWidth() * SCREEN_SIZE_RATIO / (tetrisEngine.getWidth() + PREVIEW_WIDTH));
+
+        return (int) Math.round(res);
+    }
+
+    private Rectangle getCellRectangle(Cell cell, Point offset)
+    {
+        int left = offset.x + (cell.getX() * cellSize);
+        int top = offset.y + (cell.getY() * cellSize);
+        int right = left + cellSize;
+        int bottom = top + cellSize;
+
+        return new Rectangle(left, top, right, bottom);
+    }
+
+    private int getGlassHeight()
+    {
+        return tetrisEngine.getHeight() * cellSize;
+    }
+
+    private int getGlassWidth()
+    {
+        return tetrisEngine.getWidth() * cellSize;
+    }
+
+    private int getPreviewHeight()
+    {
+        return PREVIEW_HEIGHT * cellSize;
+    }
+
+    private int getPreviewWidth()
+    {
+        return PREVIEW_WIDTH * cellSize;
+    }
+
+    private Point getPreviewCellOffset()
+    {
+        int minX = PREVIEW_WIDTH;
+        int maxX = 0;
+        int minY = PREVIEW_HEIGHT;
+        int maxY = 0;
+        for (Cell c : tetrisEngine.getNextPiece().getCells())
+        {
+            if (c.getX() > maxX)
+            {
+                maxX = c.getX();
+            }
+            if (c.getX() < minX)
+            {
+                minX = c.getX();
+            }
+            if (c.getY() > maxY)
+            {
+                maxY = c.getY();
+            }
+            if (c.getY() < minY)
+            {
+                minY = c.getY();
+            }
+        }
+
+        int x = (int) Math.round((PREVIEW_WIDTH * cellSize / 2) - (cellSize * (minX + maxX + 1) / 2));
+        int y = (int) Math.round((PREVIEW_HEIGHT * cellSize / 2) - (cellSize * (minY + maxY + 1) / 2));
+
+        return new Point(x, y);
+    }
+
+    private void drawCellIntoRectangle(Canvas canvas, Cell cell, Rectangle rectangle)
+    {
+        Image cellImage = new Image(COLOR_TO_IMAGE.get(cell.getColor().name()));
+
+        canvas.getContext2d().drawImage(ImageElement.as(cellImage.getElement()),
+            rectangle.left, rectangle.top,
+            rectangle.getWidth(), rectangle.getHeight());
+    }
+
+    private void drawCell(Cell c)
+    {
+        drawCellIntoRectangle(gameCanvas, c, getCellRectangle(c, new Point(0, 0)));
+    }
+
+    private void drawPreviewCell(Cell c)
+    {
+        drawCellIntoRectangle(previewCanvas, c, getCellRectangle(c, getPreviewCellOffset()));
+    }
+
+    private void drawGrid()
+    {
+        for (int i = 0; i < tetrisEngine.getWidth(); i++)
+        {
+            gameCanvas.getContext2d().beginPath();
+            gameCanvas.getContext2d().setLineWidth(1);
+            gameCanvas.getContext2d().setStrokeStyle(GRID_COLOR);
+            gameCanvas.getContext2d().moveTo(i * cellSize, 0);
+            gameCanvas.getContext2d().lineTo(i * cellSize, getGlassHeight());
+            gameCanvas.getContext2d().stroke();
+        }
+
+        for (int i = 0; i < tetrisEngine.getHeight(); i++)
+        {
+            gameCanvas.getContext2d().beginPath();
+            gameCanvas.getContext2d().setLineWidth(1);
+            gameCanvas.getContext2d().setStrokeStyle(GRID_COLOR);
+            gameCanvas.getContext2d().moveTo(0, cellSize * i);
+            gameCanvas.getContext2d().lineTo(getGlassWidth(), cellSize * i);
+            gameCanvas.getContext2d().stroke();
+        }
+    }
+
+    private void drawStats()
+    {
+        scoreLabel.setText(String.valueOf(tetrisEngine.getScore()));
+        speedLabel.setText(String.valueOf(tetrisEngine.getSpeed()));
+        piecesLabel.setText(String.valueOf(tetrisEngine.getPieceCount()));
+        linesLabel.setText(String.valueOf(tetrisEngine.getLineCount()));
+    }
+
+    private void drawSea()
+    {
+        if (tetrisEngine.getSea() != null)
+        {
+            for (Cell c : tetrisEngine.getSea())
+            {
+                drawCell(c);
+            }
+        }
+    }
+
+    private void drawPiece()
+    {
+        if (tetrisEngine.getPiece() != null)
+        {
+            for (Cell c : tetrisEngine.getPiece().getCells())
+            {
+                drawCell(c);
+            }
+        }
+    }
+
+    private void drawPreview()
+    {
+        if (tetrisEngine.getNextPiece() != null)
+        {
+            for (Cell c : tetrisEngine.getNextPiece().getCells())
+            {
+                drawPreviewCell(c);
+            }
+        }
+    }
+
+    private void initGameCanvasSize()
+    {
+        gameCanvas.getCanvasElement().setHeight(getGlassHeight());
+        gameCanvas.getCanvasElement().setWidth(getGlassWidth());
+        cleanCanvas(gameCanvas);
+    }
+
+    private void initPreviewCanvasSize()
+    {
+        previewCanvas.getCanvasElement().setHeight(getPreviewHeight());
+        previewCanvas.getCanvasElement().setWidth(getPreviewWidth());
+        cleanCanvas(previewCanvas);
+    }
+
+    private void cleanCanvas(Canvas canvas)
+    {
+        canvas.getContext2d().setFillStyle(FIELD_COLOR);
+        canvas.getContext2d().rect(0, 0, canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
+        canvas.getContext2d().fill();
+    }
+
+    private void initInputHandling()
+    {
+        RootPanel.get().addDomHandler(new KeyPressHandler()
+            {
+                @Override
+                public void onKeyPress(KeyPressEvent event)
+                {
+                    if (event.getCharCode() == 32)
+                    {
+                        tetrisEngine.dropPiece();
+                    }
+                }
+            }, KeyPressEvent.getType());
+
+        RootPanel.get().addDomHandler(new KeyDownHandler()
+            {
+                @Override
+                public void onKeyDown(KeyDownEvent event)
+                {
+                    if (event.getNativeKeyCode() == 37)
+                    {
+                        tetrisEngine.movePieceLeft();
+                    }
+
+                    if (event.getNativeKeyCode() == 39)
+                    {
+                        tetrisEngine.movePieceRight();
+                    }
+
+                    if (event.getNativeKeyCode() == 40)
+                    {
+                        tetrisEngine.rotatePieceClockwise();
+                    }
+
+                    if (event.getNativeKeyCode() == 38)
+                    {
+                        tetrisEngine.rotatePieceCounterclockwise();
+                    }
+                }
+            }, KeyDownEvent.getType());
+    }
+
+    private void initInputHandling2()
+    {
+        Event.addNativePreviewHandler(new Event.NativePreviewHandler()
+            {
+                public void onPreviewNativeEvent(Event.NativePreviewEvent event)
+                {
+                    NativeEvent nativeEvent = event.getNativeEvent();
+                    int typeInt = event.getTypeInt();
+
+                    switch (typeInt)
+                    {
+                    case Event.ONKEYDOWN:
+                        if (nativeEvent.getKeyCode() == 37)
+                        {
+                            tetrisEngine.movePieceLeft();
+                        }
+
+                        if (nativeEvent.getKeyCode() == 39)
+                        {
+                            tetrisEngine.movePieceRight();
+                        }
+
+                        if (nativeEvent.getKeyCode() == 40)
+                        {
+                            tetrisEngine.rotatePieceClockwise();
+                        }
+
+                        if (nativeEvent.getKeyCode() == 38)
+                        {
+                            tetrisEngine.rotatePieceCounterclockwise();
+                        }
+                        break;
+                    case Event.ONKEYPRESS:
+                        if (nativeEvent.getCharCode() == 32)
+                        {
+                            tetrisEngine.dropPiece();
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            });
+    }
+
+    private void initCellSize()
+    {
+        cellSize = getCellSize();
+    }
+
+    @Override
+    public void refresh()
+    {
+        cleanCanvas(previewCanvas);
+
+        cleanCanvas(gameCanvas);
+
+        if (isGridShown)
+        {
+            drawGrid();
+        }
+
+        drawSea();
+
+        drawPiece();
+
+        if (isPreviewShown)
+        {
+            drawPreview();
+        }
+
+        drawStats();
     }
 
     private static class Point
@@ -259,263 +604,4 @@ public class TetrisViewImpl  implements TetrisView
             return right - left;
         }
     }
-
-    private int getWindowWidth()
-    {
-        return Window.getClientWidth();
-    }
-
-    private int getWindowHeight()
-    {
-        return Window.getClientHeight();
-    }
-
-    private int getCellSize()
-    {
-        int width = getWindowWidth();
-        int height = getWindowHeight();
-        double res = Math.min(
-                height / tetrisEngine.getHeight(),
-                width / (tetrisEngine.getWidth() + PREVIEW_WIDTH));
-        if(res > MAX_CELL_SIZE)
-        {
-            res = MAX_CELL_SIZE;
-        }
-
-        return (int) Math.round(res);
-    };
-
-    private Rectangle getCellRectangle(Cell cell, Point offset)
-    {
-        int left = offset.x + cell.getX() * cellSize;
-        int top = offset.y + cell.getY() * cellSize;
-        int right = left + cellSize;
-        int bottom = top + cellSize;
-
-        return new Rectangle(left, top, right, bottom);
-    };
-
-    private int getGlassHeight()
-    {
-        return tetrisEngine.getHeight() * cellSize;
-    }
-
-    private int getGlassWidth()
-    {
-        return tetrisEngine.getWidth() * cellSize;
-    }
-
-    private int getPreviewHeight()
-    {
-        return PREVIEW_HEIGHT * cellSize;
-    }
-
-    private int getPreviewWidth()
-    {
-        return PREVIEW_WIDTH * cellSize;
-    }
-
-    private Point getPreviewCellOffset()
-    {
-        int minX = PREVIEW_WIDTH;
-        int maxX = 0;
-        int minY = PREVIEW_HEIGHT;
-        int maxY = 0;
-        for(Cell c : tetrisEngine.getNextPiece().getCells())
-        {
-            if(c.getX() > maxX)
-            {
-                maxX = c.getX();
-            }
-            if(c.getX() < minX)
-            {
-                minX = c.getX();
-            }
-            if(c.getY() > maxY)
-            {
-                maxY = c.getY();
-            }
-            if(c.getY() < minY)
-            {
-                minY = c.getY();
-            }
-        }
-        int x = (int) Math.round(PREVIEW_WIDTH * cellSize / 2 - cellSize * (minX + maxX + 1) / 2);
-        int y = (int) Math.round(PREVIEW_HEIGHT * cellSize / 2 - cellSize * (minY + maxY + 1) / 2);
-
-        return new Point(x, y);
-    };
-    
-    private void drawCellIntoRectangle(Canvas canvas, Cell cell, Rectangle rectangle)
-    {
-        Image cellImage = new Image(COLOR_TO_IMAGE.get(cell.getColor().name()));
-
-        canvas.getContext2d().drawImage(ImageElement.as(cellImage.getElement()),
-                rectangle.left, rectangle.top,
-                rectangle.getWidth(), rectangle.getHeight());
-    }
-
-    private void drawCell(Cell c)
-    {
-        drawCellIntoRectangle(gameCanvas, c, getCellRectangle(c, new Point(0, 0)));
-    }
-
-    private void drawPreviewCell(Cell c)
-    {
-        drawCellIntoRectangle(previewCanvas, c, getCellRectangle(c, getPreviewCellOffset()));
-    }
-
-    private void drawGrid()
-    {
-        for(int i = 0; i < tetrisEngine.getWidth(); i++)
-        {
-            gameCanvas.getContext2d().beginPath();
-            gameCanvas.getContext2d().setLineWidth(1);
-            gameCanvas.getContext2d().setStrokeStyle(GRID_COLOR);
-            gameCanvas.getContext2d().moveTo(i * cellSize, 0);
-            gameCanvas.getContext2d().lineTo(i * cellSize, getGlassHeight());
-            gameCanvas.getContext2d().stroke();
-        }
-
-        for(int i = 0; i < tetrisEngine.getHeight(); i++)
-        {
-            gameCanvas.getContext2d().beginPath();
-            gameCanvas.getContext2d().setLineWidth(1);
-            gameCanvas.getContext2d().setStrokeStyle(GRID_COLOR);
-            gameCanvas.getContext2d().moveTo(0, cellSize * i);
-            gameCanvas.getContext2d().lineTo(getGlassWidth(), cellSize * i);
-            gameCanvas.getContext2d().stroke();
-        }
-    }
-
-    private void drawStats()
-    {
-        scoreLabel.setText(String.valueOf(tetrisEngine.getScore()));
-        speedLabel.setText(String.valueOf(tetrisEngine.getSpeed()));
-        piecesLabel.setText(String.valueOf(tetrisEngine.getPieceCount()));
-        linesLabel.setText(String.valueOf(tetrisEngine.getLineCount()));
-    }
-
-    private void drawSea()
-    {
-        if(tetrisEngine.getSea() != null)
-        {
-            for(Cell c : tetrisEngine.getSea())
-            {
-                drawCell(c);
-            }
-        }
-    };
-
-    private void drawPiece()
-    {
-        if(tetrisEngine.getPiece() != null)
-            for(Cell c : tetrisEngine.getPiece().getCells())
-            {
-                drawCell(c);
-            }
-    };
-
-    private void drawPreview()
-    {
-        if(tetrisEngine.getNextPiece() != null)
-        {
-            for(Cell c : tetrisEngine.getNextPiece().getCells())
-            {
-                drawPreviewCell(c);
-            }
-        }
-    }
-
-    private void initGameCanvasSize()
-    {
-        gameCanvas.getCanvasElement().setHeight(getGlassHeight());
-        gameCanvas.getCanvasElement().setWidth(getGlassWidth());
-        cleanCanvas(gameCanvas);
-    }
-
-    private void initPreviewCanvasSize()
-    {
-        previewCanvas.getCanvasElement().setHeight(getPreviewHeight());
-        previewCanvas.getCanvasElement().setWidth(getPreviewWidth());
-        cleanCanvas(previewCanvas);
-    }
-
-    private void cleanCanvas(Canvas canvas)
-    {
-        canvas.getContext2d().setFillStyle(FIELD_COLOR);
-        canvas.getContext2d().rect(0, 0, canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
-        canvas.getContext2d().fill();
-    }
-
-    private void initInputHandling()
-    {
-        RootPanel.get().addDomHandler(new KeyPressHandler()
-        {
-            @Override
-            public void onKeyPress(KeyPressEvent event)
-            {
-                if(event.getCharCode() == 32)
-                {
-                    tetrisEngine.dropPiece();
-                }
-            }
-        }, KeyPressEvent.getType());
-        
-        RootPanel.get().addDomHandler(new KeyDownHandler()
-        {
-            @Override
-            public void onKeyDown(KeyDownEvent event)
-            {
-                if (event.getNativeKeyCode() == 37)
-                {
-                    tetrisEngine.movePieceLeft();
-                }
-
-                if (event.getNativeKeyCode() == 39)
-                {
-                    tetrisEngine.movePieceRight();
-                }
-
-                if (event.getNativeKeyCode() == 40)
-                {
-                    tetrisEngine.rotatePieceClockwise();
-                }
-
-                if (event.getNativeKeyCode() == 38)
-                {
-                    tetrisEngine.rotatePieceCounterclockwise();
-                }
-            }
-        }, KeyDownEvent.getType());
-    };
-
-    private void initCellSize()
-    {
-        cellSize = getCellSize();
-    };
-
-    @Override
-    public void refresh()
-    {
-        cleanCanvas(previewCanvas);
-        
-        cleanCanvas(gameCanvas);
-
-        if(isGridShown)
-        {
-            drawGrid();
-        }
-
-        drawSea();
-
-        drawPiece();
-
-        if(isPreviewShown)
-        {
-            drawPreview();
-        }
-        
-        drawStats();
-    };
 }
