@@ -9,8 +9,8 @@
         
         #headerDiv
         {
-            padding-left: 40px;
-            padding-right: 40px;
+            text-align: center;
+            padding: 20px;
         }
         
         #tableDiv
@@ -37,12 +37,17 @@
             border-width: 1px;
             border-style: solid;
         }
+        
+        #headerSpan
+        {
+            font-size: x-large;
+        }
     </ui:style>
     
     <g:PopupPanel modal="true">
         <g:HTMLPanel>
             <div id="headerDiv">
-                <h1>High Scores</h1>
+                <span id="headerSpan">High Scores</span>
             </div>
             <hr/>
             <div id="tableDiv">

@@ -7,10 +7,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.solovyev.games.gwttetris.shared.HighScore;
 
 
@@ -29,8 +26,6 @@ public class HighScoreViewImpl implements HighScoreView
     public HighScoreViewImpl()
     {
         popupPanel = highScoreViewImplUiBinder.createAndBindUi(this);
-        popupPanel.center();
-        popupPanel.show();
 
         highScoreTable.setText(0, 0, "Position");
         highScoreTable.setText(0, 1, "Name");
@@ -45,7 +40,6 @@ public class HighScoreViewImpl implements HighScoreView
                     popupPanel.hide();
                 }
             });
-        okButton.setFocus(true);
     }
 
     @Override
@@ -64,7 +58,6 @@ public class HighScoreViewImpl implements HighScoreView
             highScoreTable.setText(i + 1, 2, String.valueOf(highScores.get(i).getScore()));
             highScoreTable.setText(i + 1, 3, String.valueOf(highScores.get(i).getDate()));
         }
-        popupPanel.center();
     }
 
     @Override
@@ -77,6 +70,8 @@ public class HighScoreViewImpl implements HighScoreView
     public void show()
     {
         popupPanel.show();
+        popupPanel.center();
+        okButton.setFocus(true);
     }
 
     public interface HighScoreViewImplUiBinder extends UiBinder<PopupPanel, HighScoreViewImpl>

@@ -9,8 +9,13 @@
         
         #headerDiv
         {
-            padding-left: 40px;
-            padding-right: 40px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #headerSpan
+        {
+            font-size: x-large;
         }
         
         #mainDiv
@@ -22,7 +27,7 @@
         <g:HTMLPanel>
             <div id="mainDiv">
                 <div id="headerDiv">
-                    <h1>Game is over!</h1>
+                    <span id="headerSpan">Game is over!</span>
                 </div>
                 <hr/>
                 <div id="buttonDiv">

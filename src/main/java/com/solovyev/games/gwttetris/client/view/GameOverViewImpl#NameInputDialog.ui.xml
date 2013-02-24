@@ -9,10 +9,15 @@
 
         #headerDiv
         {
-            padding-left: 40px;
-            padding-right: 40px;
+            padding: 20px;
             white-space: nowrap;
             overflow: hidden;
+            text-align: center;
+        }
+        
+        #headerSpan
+        {
+            font-size: x-large;
         }
         
         #label
@@ -30,7 +35,7 @@
     <g:DialogBox autoHide="true" modal="true">  
         <g:HTMLPanel>
             <div id="headerDiv">
-                <h1>A high score has been achieved!</h1>
+                <span id="headerSpan">A high score has been achieved!</span>
             </div>
             <div>
                 <span id="label">Please enter your name:</span>
