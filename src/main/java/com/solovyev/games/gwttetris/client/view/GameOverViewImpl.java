@@ -1,11 +1,13 @@
 package com.solovyev.games.gwttetris.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -83,6 +85,14 @@ public class GameOverViewImpl implements GameOverView
                         presenter.handleGameOverOkButton();
                     }
                 });
+
+            Scheduler.get().scheduleDeferred(new Command()
+                {
+                    public void execute()
+                    {
+                        okButton.setFocus(true);
+                    }
+                });
         }
 
         public DialogBox getDialogBox()
@@ -123,6 +133,14 @@ public class GameOverViewImpl implements GameOverView
                     public void onClick(ClickEvent event)
                     {
                         presenter.handleNameInputCancelButton();
+                    }
+                });
+
+            Scheduler.get().scheduleDeferred(new Command()
+                {
+                    public void execute()
+                    {
+                        nameTextBox.setFocus(true);
                     }
                 });
         }

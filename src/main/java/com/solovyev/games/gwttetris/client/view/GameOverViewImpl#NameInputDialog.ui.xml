@@ -1,15 +1,47 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-  <g:DialogBox autoHide="true" modal="true">  
-    <g:HTMLPanel>
-        A high score achieved! Please enter your name below:
-        <hr/>
-        <g:TextBox ui:field='nameTextBox' focus="true"/>
-        <hr/>
-        <g:Button ui:field='okButton'>OK</g:Button>
-        <g:Button ui:field='cancelButton'>Cancel</g:Button>
-    </g:HTMLPanel>
-  </g:DialogBox>
+    <ui:style>
+        #buttonDiv
+        {
+            text-align: center;
+        }
+
+        #headerDiv
+        {
+            padding-left: 40px;
+            padding-right: 40px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        #label
+        {
+            padding-right: 10px;
+            padding-left: 10px;
+        }
+        
+        .button
+        {
+            width: 5em;
+        }
+    </ui:style>
+    
+    <g:DialogBox autoHide="true" modal="true">  
+        <g:HTMLPanel>
+            <div id="headerDiv">
+                <h1>A high score has been achieved!</h1>
+            </div>
+            <div>
+                <span id="label">Please enter your name:</span>
+                <g:TextBox ui:field='nameTextBox' focus="true"/>
+            </div>
+            <hr/>
+            <div id="buttonDiv">
+                <g:Button styleName='{style.button}' ui:field='okButton'>OK</g:Button>
+                <g:Button styleName='{style.button}' ui:field='cancelButton'>Cancel</g:Button>
+            </div>
+        </g:HTMLPanel>
+    </g:DialogBox>
 
 </ui:UiBinder>

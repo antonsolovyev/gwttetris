@@ -14,8 +14,8 @@ import com.solovyev.games.tetris.TetrisListener;
 
 public class TetrisPresenter implements TetrisView.Presenter
 {
-    private TetrisView tetrisView;
-    private HandlerManager eventBus;
+    private final TetrisView tetrisView;
+    private final HandlerManager eventBus;
     private TetrisEngine tetrisEngine;
 
     public TetrisPresenter(TetrisView tetrisView, HandlerManager eventBus)
@@ -23,6 +23,15 @@ public class TetrisPresenter implements TetrisView.Presenter
         this.tetrisView = tetrisView;
         this.eventBus = eventBus;
 
+        initTetrisEngine();
+
+        tetrisView.setPresenter(this);
+
+        tetrisEngine.start();
+    }
+
+    private void initTetrisEngine()
+    {
         tetrisEngine = new AbstractTetrisEngine(10, 20)
             {
                 private Timer timer;
@@ -70,10 +79,6 @@ public class TetrisPresenter implements TetrisView.Presenter
                     TetrisPresenter.this.tetrisView.refresh();
                 }
             });
-
-        tetrisView.setPresenter(this);
-
-        tetrisEngine.start();
     }
 
     @Override

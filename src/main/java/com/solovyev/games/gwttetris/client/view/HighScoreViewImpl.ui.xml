@@ -1,14 +1,58 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-  <g:PopupPanel modal="true">
-      <g:HTMLPanel>
-          <h1>High Scores</h1>
-          <hr/>
-          <g:FlexTable ui:field='highScoreTable'/>
-          <hr/>
-          <g:Button ui:field='okButton'>Ok</g:Button>
-      </g:HTMLPanel>
-  </g:PopupPanel>
+    <ui:style>
+        #buttonDiv
+        {
+            text-align: center;
+        }
+        
+        #headerDiv
+        {
+            padding-left: 40px;
+            padding-right: 40px;
+        }
+        
+        #tableDiv
+        {
+            padding: 20px;
+        }
+        
+        .table
+        {
+            width: 100%;
+            border-collapse: collapse;
+            border-width: 1px;
+            border-style: solid;
+            border-color: black;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #EEEEEE;
+        }
+        
+        .table td
+        {
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+        }
+    </ui:style>
+    
+    <g:PopupPanel modal="true">
+        <g:HTMLPanel>
+            <div id="headerDiv">
+                <h1>High Scores</h1>
+            </div>
+            <hr/>
+            <div id="tableDiv">
+                <g:FlexTable styleName='{style.table}' ui:field='highScoreTable'/>
+            </div>
+            <hr/>
+            <div id="buttonDiv">
+                <g:Button ui:field='okButton'>Ok</g:Button>
+            </div>
+        </g:HTMLPanel>
+    </g:PopupPanel>
 
 </ui:UiBinder>

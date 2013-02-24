@@ -32,9 +32,10 @@ public class HighScoreViewImpl implements HighScoreView
         popupPanel.center();
         popupPanel.show();
 
-        highScoreTable.setText(0, 0, "Name");
-        highScoreTable.setText(0, 1, "Score");
-        highScoreTable.setText(0, 2, "Date");
+        highScoreTable.setText(0, 0, "Position");
+        highScoreTable.setText(0, 1, "Name");
+        highScoreTable.setText(0, 2, "Score");
+        highScoreTable.setText(0, 3, "Date");
 
         okButton.addClickHandler(new ClickHandler()
             {
@@ -44,6 +45,7 @@ public class HighScoreViewImpl implements HighScoreView
                     popupPanel.hide();
                 }
             });
+        okButton.setFocus(true);
     }
 
     @Override
@@ -57,10 +59,12 @@ public class HighScoreViewImpl implements HighScoreView
     {
         for (int i = 0; i < highScores.size(); i++)
         {
-            highScoreTable.setText(i + 1, 0, highScores.get(i).getName());
-            highScoreTable.setText(i + 1, 1, String.valueOf(highScores.get(i).getScore()));
-            highScoreTable.setText(i + 1, 2, String.valueOf(highScores.get(i).getDate()));
+            highScoreTable.setText(i + 1, 0, String.valueOf(i + 1));
+            highScoreTable.setText(i + 1, 1, highScores.get(i).getName());
+            highScoreTable.setText(i + 1, 2, String.valueOf(highScores.get(i).getScore()));
+            highScoreTable.setText(i + 1, 3, String.valueOf(highScores.get(i).getDate()));
         }
+        popupPanel.center();
     }
 
     @Override

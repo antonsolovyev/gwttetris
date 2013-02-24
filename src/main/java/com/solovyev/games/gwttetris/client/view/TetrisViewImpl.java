@@ -7,11 +7,29 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import com.solovyev.games.tetris.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.solovyev.games.tetris.Cell;
+import com.solovyev.games.tetris.TetrisEngine;
 
 
 public class TetrisViewImpl implements TetrisView
@@ -36,7 +54,7 @@ public class TetrisViewImpl implements TetrisView
             }
         };
 
-    private Panel mainPanel;
+    private final Panel mainPanel;
     private Canvas gameCanvas;
     private Canvas previewCanvas;
     private Label scoreLabel;
@@ -150,90 +168,34 @@ public class TetrisViewImpl implements TetrisView
 //        controlPanel.getElement().getStyle().setBorderColor("red");
 //        controlPanel.setBorderWidth(10);
 
-        startButton = new Button("New game");
-        startButton.setWidth("100%");
-        startButton.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    tetrisEngine.stop();
-                    tetrisEngine.start();
-
-                    pauseButton.setText("Pause");
-
-                    forceDefaultFocus(startButton);
-                }
-            });
+        startButton = makeStartButton();
         res.add(startButton);
 
-        pauseButton = new Button("Pause");
-        pauseButton.setWidth("100%");
-        pauseButton.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    if (tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
-                    {
-                        pauseButton.setText("Pause");
-                        tetrisEngine.resume();
-                    }
-                    else if (tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
-                    {
-                        pauseButton.setText("Resume");
-                        tetrisEngine.pause();
-                    }
-
-                    forceDefaultFocus(pauseButton);
-                }
-            });
+        pauseButton = makePauseButton();
         res.add(pauseButton);
 
-        highScoreButton = new Button("High Scores");
-        highScoreButton.setWidth("100%");
-        highScoreButton.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    presenter.handleHighScoreButton();
-
-                    forceDefaultFocus(highScoreButton);
-                }
-            });
+        highScoreButton = makeHighScoreButton();
         res.add(highScoreButton);
 
-        previewCheckBox = new CheckBox("Show preview");
-        previewCheckBox.setValue(true);
-        previewCheckBox.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    if (previewCheckBox.getValue())
-                    {
-                        isPreviewShown = true;
-                    }
-                    else
-                    {
-                        isPreviewShown = false;
-                    }
-                    refresh();
-
-                    forceDefaultFocus(previewCheckBox);
-                }
-            });
+        previewCheckBox = makePreviewCheckBox();
         res.add(previewCheckBox);
 
-        gridCheckBox = new CheckBox("Show grid");
-        gridCheckBox.setValue(false);
-        gridCheckBox.addClickHandler(new ClickHandler()
+        gridCheckBox = makeGridCheckBox();
+        res.add(gridCheckBox);
+
+        return res;
+    }
+
+    private CheckBox makeGridCheckBox()
+    {
+        final CheckBox res = new CheckBox("Show grid");
+        res.setValue(false);
+        res.addClickHandler(new ClickHandler()
             {
                 @Override
                 public void onClick(ClickEvent event)
                 {
-                    if (gridCheckBox.getValue())
+                    if (res.getValue())
                     {
                         isGridShown = true;
                     }
@@ -243,10 +205,101 @@ public class TetrisViewImpl implements TetrisView
                     }
                     refresh();
 
-                    forceDefaultFocus(gridCheckBox);
+                    forceDefaultFocus(res);
                 }
             });
-        res.add(gridCheckBox);
+
+        return res;
+    }
+
+    private CheckBox makePreviewCheckBox()
+    {
+        final CheckBox res = new CheckBox("Show preview");
+        res.setValue(true);
+        res.addClickHandler(new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    if (res.getValue())
+                    {
+                        isPreviewShown = true;
+                    }
+                    else
+                    {
+                        isPreviewShown = false;
+                    }
+                    refresh();
+
+                    forceDefaultFocus(res);
+                }
+            });
+
+        return res;
+    }
+
+    private Button makeHighScoreButton()
+    {
+        final Button res = new Button("High Scores");
+        res.setWidth("100%");
+        res.addClickHandler(new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    presenter.handleHighScoreButton();
+
+                    forceDefaultFocus(res);
+                }
+            });
+
+        return res;
+    }
+
+    private Button makePauseButton()
+    {
+        final Button res = new Button("Pause");
+        res.setWidth("100%");
+        res.addClickHandler(new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    if (tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
+                    {
+                        res.setText("Pause");
+                        tetrisEngine.resume();
+                    }
+                    else if (tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
+                    {
+                        res.setText("Resume");
+                        tetrisEngine.pause();
+                    }
+
+                    forceDefaultFocus(res);
+                }
+            });
+
+        return res;
+    }
+
+    private Button makeStartButton()
+    {
+        final Button res = new Button("New game");
+        res.setWidth("100%");
+        res.addClickHandler(new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    tetrisEngine.stop();
+                    tetrisEngine.start();
+
+                    pauseButton.setText("Pause");
+
+                    forceDefaultFocus(res);
+                }
+            });
 
         return res;
     }
@@ -338,8 +391,8 @@ public class TetrisViewImpl implements TetrisView
             }
         }
 
-        int x = (int) Math.round((PREVIEW_WIDTH * cellSize / 2) - (cellSize * (minX + maxX + 1) / 2));
-        int y = (int) Math.round((PREVIEW_HEIGHT * cellSize / 2) - (cellSize * (minY + maxY + 1) / 2));
+        int x = Math.round((PREVIEW_WIDTH * cellSize / 2) - (cellSize * (minX + maxX + 1) / 2));
+        int y = Math.round((PREVIEW_HEIGHT * cellSize / 2) - (cellSize * (minY + maxY + 1) / 2));
 
         return new Point(x, y);
     }

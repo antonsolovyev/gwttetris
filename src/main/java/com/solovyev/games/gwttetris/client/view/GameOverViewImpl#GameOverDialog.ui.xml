@@ -1,12 +1,35 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-  <g:DialogBox modal="true">  
-    <g:HTMLPanel>
-        Game over!
-        <hr/>
-        <g:Button ui:field='okButton' focus="true">OK</g:Button>
-    </g:HTMLPanel>
-  </g:DialogBox>
+    <ui:style>
+        #buttonDiv
+        {
+            text-align: center;
+        }
+        
+        #headerDiv
+        {
+            padding-left: 40px;
+            padding-right: 40px;
+        }
+        
+        #mainDiv
+        {
+        }
+    </ui:style>
+    
+    <g:DialogBox modal="true">
+        <g:HTMLPanel>
+            <div id="mainDiv">
+                <div id="headerDiv">
+                    <h1>Game is over!</h1>
+                </div>
+                <hr/>
+                <div id="buttonDiv">
+                    <g:Button ui:field='okButton' focus="true">OK</g:Button>
+                </div>
+            </div>
+        </g:HTMLPanel>
+    </g:DialogBox>
 
 </ui:UiBinder>
