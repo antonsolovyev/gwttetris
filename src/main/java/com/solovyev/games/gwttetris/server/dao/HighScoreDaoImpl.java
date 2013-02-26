@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.solovyev.games.gwttetris.shared.HighScore;
 
 import org.apache.log4j.Logger;
@@ -23,9 +25,10 @@ public class HighScoreDaoImpl implements HighScoreDao
 
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
-    public HighScoreDaoImpl(JdbcDataSource jdbcDataSource)
+    public HighScoreDaoImpl(DataSource dataSource)
     {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcDataSource);
+        logger.info("==> prop: " + System.getProperty("jdbc.url"));
+        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
     }
 
     @Override

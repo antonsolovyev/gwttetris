@@ -17,10 +17,6 @@
         {
             font-size: x-large;
         }
-        
-        #mainDiv
-        {
-        }
     </ui:style>
     
     <g:DialogBox modal="true">
