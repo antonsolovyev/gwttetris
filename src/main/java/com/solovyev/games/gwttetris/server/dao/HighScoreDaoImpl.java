@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import com.solovyev.games.gwttetris.shared.HighScore;
 
 import org.apache.log4j.Logger;
-import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
@@ -27,7 +26,6 @@ public class HighScoreDaoImpl implements HighScoreDao
 
     public HighScoreDaoImpl(DataSource dataSource)
     {
-        logger.info("==> prop: " + System.getProperty("jdbc.url"));
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
     }
 
@@ -84,9 +82,8 @@ public class HighScoreDaoImpl implements HighScoreDao
         simpleJdbcTemplate.update("insert into high_score (name, score, date) values (?, ?, ?)",
             highScore.getName(), highScore.getScore(), highScore.getDate());
 
-        simpleJdbcTemplate.update("delete from high_score where id not in" +
-            "(select id from high_score hs1 where" +
-            "(select count(distinct score) from high_score hs2 where hs1.score < hs2.score) < ? order by score desc, date desc);",
+        simpleJdbcTemplate.update(
+            "delete from high_score where id not in (select top ? id from high_score order by score desc, date desc);",
             MAX_HIGH_SCORE_RECORDS);
     }
 }
