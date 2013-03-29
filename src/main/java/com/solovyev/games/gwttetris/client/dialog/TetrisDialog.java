@@ -1,4 +1,4 @@
-package com.solovyev.games.gwttetris.client.view;
+package com.solovyev.games.gwttetris.client.dialog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,33 +7,21 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Focusable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.solovyev.games.tetris.Cell;
-import com.solovyev.games.tetris.TetrisEngine;
+import com.google.gwt.user.client.ui.*;
+import com.solovyev.games.gwttetris.client.event.GameOverEvent;
+import com.solovyev.games.gwttetris.client.event.ShowHighScoresEvent;
+import com.solovyev.games.tetris.*;
 
 
-public class TetrisViewImpl implements TetrisView
+public class TetrisDialog implements Dialog
 {
+    private static final int GLASS_WIDTH = 10;
+    private static final int GLASS_HEIGHT = 20;
     private static final int PREVIEW_WIDTH = 5;
     private static final int PREVIEW_HEIGHT = 5;
     private static final double SCREEN_SIZE_RATIO = 0.75;
@@ -66,27 +54,101 @@ public class TetrisViewImpl implements TetrisView
     private Button highScoreButton;
     private CheckBox previewCheckBox;
     private CheckBox gridCheckBox;
-
     private int cellSize;
     private boolean isGridShown = false;
     private boolean isPreviewShown = true;
 
-    private Presenter presenter;
     private TetrisEngine tetrisEngine;
 
-    public TetrisViewImpl()
+    private final HandlerManager eventBus;
+
+    public TetrisDialog(HandlerManager eventBus)
     {
+        this.eventBus = eventBus;
+
         if (!Canvas.isSupported())
         {
             throw new RuntimeException("Sorry, browser does not support HTML5 canvas, can't continue.");
         }
 
+        initTetrisEngine();
+
         FlexTable flexTable = makeFlexTable();
 
         mainPanel = makeMainPanel(flexTable);
 
-        initInputHandling2();
+        initCellSize();
 
+        initGameCanvasSize();
+
+        initPreviewCanvasSize();
+
+        initInputHandling();
+
+        tetrisEngine.start();
+    }
+
+    @Override
+    public void display(HasWidgets container)
+    {
+        container.clear();
+        container.add(mainPanel);
+    }
+
+    private void initTetrisEngine()
+    {
+        tetrisEngine = new AbstractTetrisEngine(GLASS_WIDTH, GLASS_HEIGHT)
+            {
+                private Timer timer;
+
+                @Override
+                protected void startTimer()
+                {
+                    timer = new Timer()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                timerEvent();
+                            }
+                        };
+
+                    timer.scheduleRepeating(getTimerTick());
+                }
+
+                @Override
+                protected void stopTimer()
+                {
+                    if (timer != null)
+                    {
+                        timer.cancel();
+                        timer = null;
+                    }
+                }
+            };
+
+        tetrisEngine.addTetrisListener(new TetrisListener()
+            {
+                private TetrisEngine.GameState previousGameState;
+
+                @Override
+                public void stateChanged(TetrisEvent tetrisEvent)
+                {
+                    if ((tetrisEngine.getGameState() == TetrisEngine.GameState.GAMEOVER) &&
+                            (tetrisEngine.getGameState() != previousGameState))
+                    {
+                        TetrisDialog.this.eventBus.fireEvent(new GameOverEvent(tetrisEngine));
+                    }
+                    previousGameState = tetrisEngine.getGameState();
+
+                    TetrisDialog.this.refresh();
+                }
+            });
+    }
+
+    private void handleHighScoreButton()
+    {
+        eventBus.fireEvent(new ShowHighScoresEvent());
     }
 
     private Panel makeMainPanel(Widget widget)
@@ -247,7 +309,7 @@ public class TetrisViewImpl implements TetrisView
                 @Override
                 public void onClick(ClickEvent event)
                 {
-                    presenter.handleHighScoreButton();
+                    handleHighScoreButton();
 
                     forceDefaultFocus(res);
                 }
@@ -307,23 +369,6 @@ public class TetrisViewImpl implements TetrisView
     private void forceDefaultFocus(Focusable focusable)
     {
         focusable.setFocus(false);
-    }
-
-    @Override
-    public void setPresenter(Presenter presenter)
-    {
-        this.presenter = presenter;
-        this.tetrisEngine = presenter.getTetrisEngine();
-
-        initCellSize();
-        initGameCanvasSize();
-        initPreviewCanvasSize();
-    }
-
-    @Override
-    public Widget asWidget()
-    {
-        return mainPanel;
     }
 
     private int getCellSize()
@@ -503,48 +548,6 @@ public class TetrisViewImpl implements TetrisView
 
     private void initInputHandling()
     {
-        RootPanel.get().addDomHandler(new KeyPressHandler()
-            {
-                @Override
-                public void onKeyPress(KeyPressEvent event)
-                {
-                    if (event.getCharCode() == 32)
-                    {
-                        tetrisEngine.dropPiece();
-                    }
-                }
-            }, KeyPressEvent.getType());
-
-        RootPanel.get().addDomHandler(new KeyDownHandler()
-            {
-                @Override
-                public void onKeyDown(KeyDownEvent event)
-                {
-                    if (event.getNativeKeyCode() == 37)
-                    {
-                        tetrisEngine.movePieceLeft();
-                    }
-
-                    if (event.getNativeKeyCode() == 39)
-                    {
-                        tetrisEngine.movePieceRight();
-                    }
-
-                    if (event.getNativeKeyCode() == 40)
-                    {
-                        tetrisEngine.rotatePieceClockwise();
-                    }
-
-                    if (event.getNativeKeyCode() == 38)
-                    {
-                        tetrisEngine.rotatePieceCounterclockwise();
-                    }
-                }
-            }, KeyDownEvent.getType());
-    }
-
-    private void initInputHandling2()
-    {
         Event.addNativePreviewHandler(new Event.NativePreviewHandler()
             {
                 public void onPreviewNativeEvent(Event.NativePreviewEvent event)
@@ -593,8 +596,7 @@ public class TetrisViewImpl implements TetrisView
         cellSize = getCellSize();
     }
 
-    @Override
-    public void refresh()
+    private void refresh()
     {
         cleanCanvas(previewCanvas);
 
