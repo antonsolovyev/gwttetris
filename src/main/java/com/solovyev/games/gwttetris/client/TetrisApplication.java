@@ -28,9 +28,7 @@ import com.solovyev.games.tetris.TetrisEngine;
 public class TetrisApplication implements EntryPoint, ValueChangeHandler<String>
 {
     private static final Logger logger = Logger.getLogger(TetrisApplication.class.getName());
-
     private static final String TETRIS_TOKEN = "tetris";
-
     private HandlerManager eventBus;
     private HasWidgets container;
     private HighScoreServiceAsync highScoreService;

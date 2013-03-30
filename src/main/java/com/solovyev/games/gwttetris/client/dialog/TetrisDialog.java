@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiFactory;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -20,6 +24,8 @@ import com.solovyev.games.tetris.*;
 
 public class TetrisDialog implements Dialog
 {
+    private static TetrisDialogUiBinder tetrisDialogUiBinder = GWT.create(TetrisDialogUiBinder.class);
+
     private static final int GLASS_WIDTH = 10;
     private static final int GLASS_HEIGHT = 20;
     private static final int PREVIEW_WIDTH = 5;
@@ -27,7 +33,6 @@ public class TetrisDialog implements Dialog
     private static final double SCREEN_SIZE_RATIO = 0.75;
     private static final String GRID_COLOR = "#404040";
     private static final String FIELD_COLOR = "black";
-    private static final String BACKGROUND_COLOR = "gray";
     private static final Map<String, String> COLOR_TO_IMAGE = new HashMap<String, String>()
         {
 
@@ -42,24 +47,42 @@ public class TetrisDialog implements Dialog
             }
         };
 
-    private final Panel mainPanel;
-    private Canvas gameCanvas;
-    private Canvas previewCanvas;
-    private Label scoreLabel;
-    private Label speedLabel;
-    private Label linesLabel;
-    private Label piecesLabel;
-    private Button pauseButton;
-    private Button startButton;
-    private Button highScoreButton;
-    private CheckBox previewCheckBox;
-    private CheckBox gridCheckBox;
+    @UiField
+    public Canvas gameCanvas;
+
+    @UiField
+    public Canvas previewCanvas;
+
+    @UiField
+    public Label scoreLabel;
+
+    @UiField
+    public Label speedLabel;
+
+    @UiField
+    public Label linesLabel;
+
+    @UiField
+    public Label piecesLabel;
+
+    @UiField
+    public Button pauseButton;
+
+    @UiField
+    public Button startButton;
+
+    @UiField
+    public Button highScoreButton;
+
+    @UiField
+    public CheckBox previewCheckBox;
+
+    @UiField
+    public CheckBox gridCheckBox;
+
+    private HTMLPanel htmlPanel;
     private int cellSize;
-    private boolean isGridShown = false;
-    private boolean isPreviewShown = true;
-
     private TetrisEngine tetrisEngine;
-
     private final HandlerManager eventBus;
 
     public TetrisDialog(HandlerManager eventBus)
@@ -73,9 +96,7 @@ public class TetrisDialog implements Dialog
 
         initTetrisEngine();
 
-        FlexTable flexTable = makeFlexTable();
-
-        mainPanel = makeMainPanel(flexTable);
+        htmlPanel = tetrisDialogUiBinder.createAndBindUi(this);
 
         initCellSize();
 
@@ -92,7 +113,65 @@ public class TetrisDialog implements Dialog
     public void display(HasWidgets container)
     {
         container.clear();
-        container.add(mainPanel);
+        container.add(htmlPanel);
+    }
+
+    @UiFactory
+    public Canvas makeCanvas()
+    {
+        return Canvas.createIfSupported();
+    }
+
+    @UiHandler("gridCheckBox")
+    public void gridCheckBoxHandler(ClickEvent clickEvent)
+    {
+        refresh();
+
+        forceDefaultFocus(gridCheckBox);
+    }
+
+    @UiHandler("previewCheckBox")
+    public void previewCheckBoxHandler(ClickEvent clickEvent)
+    {
+        refresh();
+
+        forceDefaultFocus(previewCheckBox);
+    }
+
+    @UiHandler("highScoreButton")
+    public void highScoreButtonHandler(ClickEvent clickEvent)
+    {
+        eventBus.fireEvent(new ShowHighScoresEvent());
+
+        forceDefaultFocus(highScoreButton);
+    }
+
+    @UiHandler("pauseButton")
+    public void pauseButtonHandler(ClickEvent clickEvent)
+    {
+        if (tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
+        {
+            pauseButton.setText("Pause");
+            tetrisEngine.resume();
+        }
+        else if (tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
+        {
+            pauseButton.setText("Resume");
+            tetrisEngine.pause();
+        }
+
+        forceDefaultFocus(pauseButton);
+    }
+
+    @UiHandler("startButton")
+    public void startButtonHandler(ClickEvent clickEvent)
+    {
+        tetrisEngine.stop();
+        tetrisEngine.start();
+
+        pauseButton.setText("Pause");
+
+        forceDefaultFocus(startButton);
     }
 
     private void initTetrisEngine()
@@ -144,226 +223,6 @@ public class TetrisDialog implements Dialog
                     TetrisDialog.this.refresh();
                 }
             });
-    }
-
-    private void handleHighScoreButton()
-    {
-        eventBus.fireEvent(new ShowHighScoresEvent());
-    }
-
-    private Panel makeMainPanel(Widget widget)
-    {
-        VerticalPanel res = new VerticalPanel();
-        RootPanel.get().getElement().getStyle().setMargin(0, Style.Unit.PX);
-        RootPanel.get().getElement().getStyle().setPadding(0, Style.Unit.PX);
-        res.setWidth("100%");
-        res.add(widget);
-        res.setCellHorizontalAlignment(widget, HasHorizontalAlignment.ALIGN_CENTER);
-        res.setCellVerticalAlignment(widget, HasVerticalAlignment.ALIGN_MIDDLE);
-        res.getElement().getStyle().setHeight(Window.getClientHeight(), Style.Unit.PX);
-
-        return res;
-    }
-
-    private FlexTable makeFlexTable()
-    {
-        FlexTable res = new FlexTable();
-
-        previewCanvas = Canvas.createIfSupported();
-        res.setWidget(0, 0, previewCanvas);
-
-        gameCanvas = Canvas.createIfSupported();
-        res.setWidget(0, 1, gameCanvas);
-
-        Panel scorePanel = makeStatsPanel();
-        res.setWidget(1, 0, scorePanel);
-
-        Panel controlPanel = makeControlPanel();
-        res.setWidget(0, 2, controlPanel);
-
-        res.getFlexCellFormatter().setRowSpan(0, 1, 2);
-        res.getFlexCellFormatter().setRowSpan(0, 2, 2);
-        res.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-        res.getFlexCellFormatter().setHeight(0, 0, String.valueOf(previewCanvas.getCanvasElement().getHeight()));
-        res.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
-        res.getFlexCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        res.getElement().getStyle().setBackgroundColor(BACKGROUND_COLOR);
-
-        return res;
-    }
-
-    private Panel makeStatsPanel()
-    {
-        VerticalPanel res = new VerticalPanel();
-        res.setWidth("100%");
-//        panel.getElement().getStyle().setBackgroundColor("blue");
-//        panel.getElement().getStyle().setBorderColor("red");
-//        panel.setBorderWidth(10);
-
-        scoreLabel = new Label();
-        res.add(makeStatsEntryPanel("Score:", scoreLabel));
-        speedLabel = new Label();
-        res.add(makeStatsEntryPanel("Speed:", speedLabel));
-        linesLabel = new Label();
-        res.add(makeStatsEntryPanel("Lines:", linesLabel));
-        piecesLabel = new Label();
-        res.add(makeStatsEntryPanel("Pieces:", piecesLabel));
-
-        return res;
-    }
-
-    private Panel makeStatsEntryPanel(String name, Label valueLabel)
-    {
-        DockPanel res = new DockPanel();
-        res.setWidth("100%");
-        res.add(new Label(name), DockPanel.WEST);
-        valueLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        res.add(valueLabel, DockPanel.EAST);
-
-        return res;
-    }
-
-    private Panel makeControlPanel()
-    {
-        VerticalPanel res = new VerticalPanel();
-//        controlPanel.getElement().getStyle().setBackgroundColor("blue");
-//        controlPanel.getElement().getStyle().setBorderColor("red");
-//        controlPanel.setBorderWidth(10);
-
-        startButton = makeStartButton();
-        res.add(startButton);
-
-        pauseButton = makePauseButton();
-        res.add(pauseButton);
-
-        highScoreButton = makeHighScoreButton();
-        res.add(highScoreButton);
-
-        previewCheckBox = makePreviewCheckBox();
-        res.add(previewCheckBox);
-
-        gridCheckBox = makeGridCheckBox();
-        res.add(gridCheckBox);
-
-        return res;
-    }
-
-    private CheckBox makeGridCheckBox()
-    {
-        final CheckBox res = new CheckBox("Show grid");
-        res.setValue(false);
-        res.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    if (res.getValue())
-                    {
-                        isGridShown = true;
-                    }
-                    else
-                    {
-                        isGridShown = false;
-                    }
-                    refresh();
-
-                    forceDefaultFocus(res);
-                }
-            });
-
-        return res;
-    }
-
-    private CheckBox makePreviewCheckBox()
-    {
-        final CheckBox res = new CheckBox("Show preview");
-        res.setValue(true);
-        res.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    if (res.getValue())
-                    {
-                        isPreviewShown = true;
-                    }
-                    else
-                    {
-                        isPreviewShown = false;
-                    }
-                    refresh();
-
-                    forceDefaultFocus(res);
-                }
-            });
-
-        return res;
-    }
-
-    private Button makeHighScoreButton()
-    {
-        final Button res = new Button("High Scores");
-        res.setWidth("100%");
-        res.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    handleHighScoreButton();
-
-                    forceDefaultFocus(res);
-                }
-            });
-
-        return res;
-    }
-
-    private Button makePauseButton()
-    {
-        final Button res = new Button("Pause");
-        res.setWidth("100%");
-        res.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    if (tetrisEngine.getGameState() == TetrisEngine.GameState.PAUSED)
-                    {
-                        res.setText("Pause");
-                        tetrisEngine.resume();
-                    }
-                    else if (tetrisEngine.getGameState() == TetrisEngine.GameState.RUNNING)
-                    {
-                        res.setText("Resume");
-                        tetrisEngine.pause();
-                    }
-
-                    forceDefaultFocus(res);
-                }
-            });
-
-        return res;
-    }
-
-    private Button makeStartButton()
-    {
-        final Button res = new Button("New game");
-        res.setWidth("100%");
-        res.addClickHandler(new ClickHandler()
-            {
-                @Override
-                public void onClick(ClickEvent event)
-                {
-                    tetrisEngine.stop();
-                    tetrisEngine.start();
-
-                    pauseButton.setText("Pause");
-
-                    forceDefaultFocus(res);
-                }
-            });
-
-        return res;
     }
 
     private void forceDefaultFocus(Focusable focusable)
@@ -602,7 +461,7 @@ public class TetrisDialog implements Dialog
 
         cleanCanvas(gameCanvas);
 
-        if (isGridShown)
+        if (gridCheckBox.getValue())
         {
             drawGrid();
         }
@@ -611,12 +470,16 @@ public class TetrisDialog implements Dialog
 
         drawPiece();
 
-        if (isPreviewShown)
+        if (previewCheckBox.getValue())
         {
             drawPreview();
         }
 
         drawStats();
+    }
+
+    public interface TetrisDialogUiBinder extends UiBinder<HTMLPanel, TetrisDialog>
+    {
     }
 
     private static class Point

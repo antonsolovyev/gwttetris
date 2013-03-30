@@ -1,5 +1,5 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
     <ui:style>
         #buttonDiv
@@ -28,7 +28,8 @@
         
         .button
         {
-            width: 5em;
+            width: 7em;
+            height: 3em;
         }
     </ui:style>
     
@@ -39,12 +40,12 @@
             </div>
             <div>
                 <span id="label">Please enter your name:</span>
-                <g:TextBox ui:field='nameTextBox' focus="true"/>
+                <g:TextBox ui:field="nameTextBox" focus="true"/>
             </div>
             <hr/>
             <div id="buttonDiv">
-                <g:Button styleName='{style.button}' ui:field='okButton'>OK</g:Button>
-                <g:Button styleName='{style.button}' ui:field='cancelButton'>Cancel</g:Button>
+                <g:Button styleName="{style.button}" ui:field="okButton">OK</g:Button>
+                <g:Button styleName="{style.button}" ui:field="cancelButton">Cancel</g:Button>
             </div>
         </g:HTMLPanel>
     </g:DialogBox>

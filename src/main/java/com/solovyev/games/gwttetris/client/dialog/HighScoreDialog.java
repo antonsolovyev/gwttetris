@@ -20,7 +20,7 @@ public class HighScoreDialog implements Dialog
 {
     private static final Logger logger = Logger.getLogger(HighScoreDialog.class.getName());
 
-    private static HighScoreDialogUiBinder highScoreViewImplUiBinder = GWT.create(HighScoreDialogUiBinder.class);
+    private static HighScoreDialogUiBinder highScoreDialogUiBinder = GWT.create(HighScoreDialogUiBinder.class);
     private HandlerManager handlerManager;
     private HighScoreServiceAsync highScoreService;
     private PopupPanel popupPanel;
@@ -36,7 +36,7 @@ public class HighScoreDialog implements Dialog
         this.handlerManager = eventBus;
         this.highScoreService = highScoreService;
 
-        popupPanel = highScoreViewImplUiBinder.createAndBindUi(this);
+        popupPanel = highScoreDialogUiBinder.createAndBindUi(this);
 
         highScoreTable.setText(0, 0, "Position");
         highScoreTable.setText(0, 1, "Name");
