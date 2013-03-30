@@ -1,0 +1,140 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:gc="urn:import:com.google.gwt.canvas.client">
+    <ui:style>
+        body,html
+        {
+            height: 100%;
+            padding: 0px;
+            margin: 0px;
+            border: 0px;
+        }
+        
+        .mainPanel
+        {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .layoutTable
+        {
+            background: #BBBBBB;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .scoreCell
+        {
+            vertical-align: top;
+        }
+        
+        .controlCell
+        {
+            vertical-align: top;
+        }
+        
+        .canvasCell
+        {
+            height: 100%;
+            padding: 5px;
+        }
+        
+        .scorePanel
+        {
+            width: 100%;
+            padding: 5px;
+        }
+        
+        .labelPanel
+        {
+            width: 100%;
+        }
+        
+        .valueLabel
+        {
+            text-align: right;
+        }
+        
+        .controlPanel
+        {
+            width: 100%;
+            padding: 5px;
+        }
+        
+        .controlButton
+        {
+            width: 100%;
+            height: 3em;
+            padding: 5px;
+            vertical-align: middle;
+        }
+        
+        .canvas
+        {
+        }
+    </ui:style>
+    
+    <g:HTMLPanel tag="table" styleName="{style.mainPanel}">
+        <tr>
+            <td>
+                <table class="{style.layoutTable}">
+                    <tr>
+                        <td class="{style.canvasCell}">
+                            <gc:Canvas styleName="{style.canvas}" ui:field="previewCanvas"/>
+                        </td>
+                        <td rowspan="2" class="{style.canvasCell}">
+                            <gc:Canvas styleName="{style.canvas}" ui:field="gameCanvas"/>
+                        </td>
+                        <td rowspan="2" class="{style.controlCell}">
+                            <g:VerticalPanel styleName="{style.controlPanel}">
+                                <g:Button styleName="{style.controlButton}" ui:field="startButton">New game</g:Button>
+                                <g:Button styleName="{style.controlButton}" ui:field="pauseButton">Pause</g:Button>
+                                <g:Button styleName="{style.controlButton}" ui:field="highScoreButton">High scores</g:Button>
+                                <g:CheckBox value="true" ui:field="previewCheckBox">Show preview</g:CheckBox>
+                                <g:CheckBox ui:field="gridCheckBox">Show grid</g:CheckBox>
+                            </g:VerticalPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="{style.scoreCell}">
+                            <g:VerticalPanel styleName="{style.scorePanel}">
+                                <g:DockPanel styleName="{style.labelPanel}">
+                                    <g:Dock direction="WEST">
+                                        <g:Label>Score:</g:Label>
+                                    </g:Dock>
+                                    <g:Dock direction="EAST">
+                                        <g:Label styleName="{style.valueLabel}" ui:field="scoreLabel"/>
+                                    </g:Dock>
+                                </g:DockPanel>
+                                <g:DockPanel styleName="{style.labelPanel}">
+                                    <g:Dock direction="WEST">
+                                        <g:Label>Speed:</g:Label>
+                                    </g:Dock>
+                                    <g:Dock direction="EAST">
+                                        <g:Label styleName="{style.valueLabel}" ui:field="speedLabel"/>
+                                    </g:Dock>
+                                </g:DockPanel>
+                                <g:DockPanel styleName="{style.labelPanel}">
+                                    <g:Dock direction="WEST">
+                                        <g:Label>Lines:</g:Label>
+                                    </g:Dock>
+                                    <g:Dock direction="EAST">
+                                        <g:Label styleName="{style.valueLabel}" ui:field="linesLabel"/>
+                                    </g:Dock>
+                                </g:DockPanel>
+                                <g:DockPanel styleName="{style.labelPanel}">
+                                    <g:Dock direction="WEST">
+                                        <g:Label>Pieces:</g:Label>
+                                    </g:Dock>
+                                    <g:Dock direction="EAST">
+                                        <g:Label styleName="{style.valueLabel}" ui:field="piecesLabel"/>
+                                    </g:Dock>
+                                </g:DockPanel>
+                            </g:VerticalPanel>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </g:HTMLPanel>
+</ui:UiBinder>
