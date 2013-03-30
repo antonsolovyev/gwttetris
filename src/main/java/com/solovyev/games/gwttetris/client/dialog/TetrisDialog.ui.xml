@@ -87,7 +87,7 @@
         
         .navigationButton
         {
-            height: 4em;
+            height: 3em;
             width: 4em;
             padding: 10px;
             vertical-align: middle;
