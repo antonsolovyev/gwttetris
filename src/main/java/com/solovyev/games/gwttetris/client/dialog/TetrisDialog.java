@@ -80,6 +80,18 @@ public class TetrisDialog implements Dialog
     @UiField
     public CheckBox gridCheckBox;
 
+    @UiField
+    public Button moveLeftButton;
+
+    @UiField
+    public Button moveRightButton;
+
+    @UiField
+    public Button rotateCounterclockwiseButton;
+
+    @UiField
+    public Button rotateClockwiseButton;
+
     private HTMLPanel htmlPanel;
     private int cellSize;
     private TetrisEngine tetrisEngine;
@@ -105,6 +117,8 @@ public class TetrisDialog implements Dialog
         initPreviewCanvasSize();
 
         initInputHandling();
+
+        initAutorepeatingButtons();
 
         tetrisEngine.start();
     }
@@ -172,6 +186,47 @@ public class TetrisDialog implements Dialog
         pauseButton.setText("Pause");
 
         forceDefaultFocus(startButton);
+    }
+
+    @UiHandler("dropButton")
+    public void dropButtonHandler(ClickEvent clickEvent)
+    {
+        tetrisEngine.dropPiece();
+    }
+
+    private void initAutorepeatingButtons()
+    {
+        new AutorepeatingButton(moveLeftButton)
+        {
+            public void handle()
+            {
+                tetrisEngine.movePieceLeft();
+            }
+        };
+
+        new AutorepeatingButton(moveRightButton)
+        {
+            public void handle()
+            {
+                tetrisEngine.movePieceRight();
+            }
+        };
+
+        new AutorepeatingButton(rotateCounterclockwiseButton)
+        {
+            public void handle()
+            {
+                tetrisEngine.rotatePieceCounterclockwise();
+            }
+        };
+
+        new AutorepeatingButton(rotateClockwiseButton)
+        {
+            public void handle()
+            {
+                tetrisEngine.rotatePieceClockwise();
+            }
+        };
     }
 
     private void initTetrisEngine()
@@ -518,5 +573,62 @@ public class TetrisDialog implements Dialog
         {
             return right - left;
         }
+    }
+
+    private abstract static class AutorepeatingButton
+    {
+        private static final int INITIAL_DELAY = 500;
+        private static final int REPEAT_INTERVAL = 20;
+        private Button button;
+        private boolean isRepeating = false;
+        private Timer timer;
+
+        public AutorepeatingButton(Button button)
+        {
+            this.button = button;
+
+            button.addMouseDownHandler(new MouseDownHandler()
+                {
+                    @Override
+                    public void onMouseDown(MouseDownEvent event)
+                    {
+                        isRepeating = false;
+
+                        timer = new Timer()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    isRepeating = true;
+                                    AutorepeatingButton.this.handle();
+                                    timer.schedule(REPEAT_INTERVAL);
+                                }
+                            };
+                        timer.schedule(INITIAL_DELAY);
+                    }
+
+                });
+
+            button.addMouseUpHandler(new MouseUpHandler()
+                {
+                    @Override
+                    public void onMouseUp(MouseUpEvent event)
+                    {
+                        if (!isRepeating)
+                        {
+                            AutorepeatingButton.this.handle();
+                        }
+                        timer.cancel();
+                        isRepeating = false;
+                    }
+                });
+        }
+
+        public Button getButton()
+        {
+            return button;
+        }
+
+        public abstract void handle();
     }
 }

@@ -32,6 +32,22 @@
         {
             vertical-align: top;
         }
+
+        .navigationCell
+        {
+            vertical-align: bottom;
+            padding-bottom: 10px;
+        }
+        
+        .navigationLayoutTable
+        {
+        }
+
+        .navigationLayoutTable td
+        {
+            text-align: center;
+            vertical-align: middle;
+        }
         
         .canvasCell
         {
@@ -69,6 +85,19 @@
             vertical-align: middle;
         }
         
+        .navigationButton
+        {
+            height: 4em;
+            width: 4em;
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        .dropButton
+        {
+            width: 100%;
+        }
+        
         .canvas
         {
         }
@@ -85,7 +114,7 @@
                         <td rowspan="2" class="{style.canvasCell}">
                             <gc:Canvas styleName="{style.canvas}" ui:field="gameCanvas"/>
                         </td>
-                        <td rowspan="2" class="{style.controlCell}">
+                        <td class="{style.controlCell}">
                             <g:VerticalPanel styleName="{style.controlPanel}">
                                 <g:Button styleName="{style.controlButton}" ui:field="startButton">New game</g:Button>
                                 <g:Button styleName="{style.controlButton}" ui:field="pauseButton">Pause</g:Button>
@@ -131,6 +160,31 @@
                                     </g:Dock>
                                 </g:DockPanel>
                             </g:VerticalPanel>
+                        </td>
+                        <td class="{style.navigationCell}">
+                            <table class="{style.navigationLayoutTable}">
+                                <tr>
+                                    <td rowspan="2">
+                                        <g:Button styleName="{style.navigationButton}" ui:field="moveLeftButton">&#8592;</g:Button>    
+                                    </td>
+                                    <td>
+                                        <g:Button styleName="{style.navigationButton}" ui:field="rotateCounterclockwiseButton">&#8630;</g:Button>
+                                    </td>
+                                    <td rowspan="2">
+                                        <g:Button styleName="{style.navigationButton}" ui:field="moveRightButton">&#8594;</g:Button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <g:Button styleName="{style.navigationButton}" ui:field="rotateClockwiseButton">&#8631;</g:Button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <g:Button styleName="{style.navigationButton}" addStyleNames="{style.dropButton}" ui:field="dropButton">&#8595;</g:Button>
+                                    </td>
+                                </tr>                                
+                            </table>
                         </td>
                     </tr>
                 </table>
