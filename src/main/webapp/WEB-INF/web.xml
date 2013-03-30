@@ -24,12 +24,12 @@
 
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
-        <url-pattern>/tetrisapplication/highScoreService</url-pattern>
+        <url-pattern>/tetris/highScoreService</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->
     <welcome-file-list>
-        <welcome-file>TetrisApplication.html</welcome-file>
+        <welcome-file>Tetris.html</welcome-file>
     </welcome-file-list>
 
     <!-- Logging -->
@@ -40,6 +40,6 @@
     
     <servlet-mapping>
         <servlet-name>remoteLogging</servlet-name>
-        <url-pattern>/tetrisapplication/remote_logging</url-pattern>
+        <url-pattern>/tetris/remote_logging</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -4,7 +4,7 @@
 
     <bean id="handlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
 
-    <bean name="/tetrisapplication/highScoreService" class="com.solovyev.games.gwttetris.server.HighScoreServiceImpl">
+    <bean name="/tetris/highScoreService" class="com.solovyev.games.gwttetris.server.HighScoreServiceImpl">
         <constructor-arg index="0">
             <ref bean="highScoreDao"/>
         </constructor-arg>
