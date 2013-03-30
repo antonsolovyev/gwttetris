@@ -148,6 +148,9 @@
         <!-- Plugin configuration. There are many available options, 
              see gwt-maven-plugin documentation at codehaus.org --> 
         <configuration>
+          <compileSourcesArtifacts>
+            <artifact>com.solovyev.games.tetris:tetris_engine</artifact>
+          </compileSourcesArtifacts>
           <!-- URL that should be automatically opened in the GWT shell (gwt:run). -->
           <runTarget>TetrisApplication.html</runTarget>
           <!-- Location of the develop-mode web application structure (gwt:run). -->
