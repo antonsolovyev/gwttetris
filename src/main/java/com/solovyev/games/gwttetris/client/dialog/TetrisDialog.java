@@ -455,6 +455,7 @@ public class TetrisDialog implements Dialog
 
     private void cleanCanvas(Canvas canvas)
     {
+        canvas.getCanvasElement().setWidth(canvas.getCanvasElement().getWidth());
         canvas.getContext2d().setFillStyle(FIELD_COLOR);
         canvas.getContext2d().rect(0, 0, canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
         canvas.getContext2d().fill();
