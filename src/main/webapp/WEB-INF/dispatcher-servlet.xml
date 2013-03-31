@@ -6,7 +6,7 @@
 
     <bean name="/tetris/highScoreService" class="com.solovyev.games.gwttetris.server.HighScoreServiceImpl">
         <constructor-arg index="0">
-            <ref bean="highScoreDao"/>
+            <ref bean="highScoreDatastoreDao"/>
         </constructor-arg>
     </bean>
 

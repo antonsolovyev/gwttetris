@@ -10,24 +10,24 @@
         </layout>
     </appender>
 
-    <appender name="rolling" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="file" value="${catalina.base}/logs/gwttetris.log" />
-        <param name="datePattern" value="'.'yyyy-MM-dd" />
-        <param name="append" value="true" />
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%-5p %d [%t] %c: %m%n"/>
-        </layout>
-    </appender>
+    <!--<appender name="rolling" class="org.apache.log4j.DailyRollingFileAppender">-->
+        <!--<param name="file" value="${catalina.base}/logs/gwttetris.log" />-->
+        <!--<param name="datePattern" value="'.'yyyy-MM-dd" />-->
+        <!--<param name="append" value="true" />-->
+        <!--<layout class="org.apache.log4j.PatternLayout">-->
+            <!--<param name="ConversionPattern" value="%-5p %d [%t] %c: %m%n"/>-->
+        <!--</layout>-->
+    <!--</appender>-->
     
     <logger name="com.solovyev.games.gwttetris" additivity="false">
         <level value="debug"/>
-        <appender-ref ref="rolling"/>
+        <!--<appender-ref ref="rolling"/>-->
         <appender-ref ref="console"/>
     </logger>
 
     <root additivity="true">
         <level value="info"/>
-        <appender-ref ref="rolling"/>
+        <!--<appender-ref ref="rolling"/>-->
         <appender-ref ref="console"/>
     </root>
 

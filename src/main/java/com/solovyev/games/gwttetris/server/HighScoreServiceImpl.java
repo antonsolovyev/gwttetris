@@ -1,6 +1,7 @@
 package com.solovyev.games.gwttetris.server;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +12,6 @@ import com.solovyev.games.gwttetris.client.service.HighScoreService;
 import com.solovyev.games.gwttetris.server.dao.HighScoreDao;
 import com.solovyev.games.gwttetris.shared.HighScore;
 
-import org.apache.log4j.Logger;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;

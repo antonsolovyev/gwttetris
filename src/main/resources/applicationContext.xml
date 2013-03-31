@@ -27,9 +27,12 @@
     
     <tx:annotation-driven transaction-manager="transactionManager" />
     
-    <bean id="highScoreDao" class="com.solovyev.games.gwttetris.server.dao.HighScoreDaoImpl">
+    <bean id="highScoreJdbcDao" class="com.solovyev.games.gwttetris.server.dao.HighScoreDaoJdbcImpl">
         <constructor-arg index="0">
             <ref bean="dataSource"/>
         </constructor-arg>    
     </bean>
+
+    <bean id="highScoreDatastoreDao" class="com.solovyev.games.gwttetris.server.dao.HighScoreDaoDatastoreImpl"/>
+
 </beans>

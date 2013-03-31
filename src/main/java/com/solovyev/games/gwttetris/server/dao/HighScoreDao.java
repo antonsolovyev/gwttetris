@@ -9,12 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface HighScoreDao
 {
-    @Transactional(readOnly = true)
+    public static final int MAX_HIGH_SCORE_RECORDS = 10;
+
     public List<HighScore> getHighScores();
 
-    @Transactional(readOnly = true)
     public boolean isHighScore(Integer score);
 
-    @Transactional(readOnly = false)
     public void saveHighScore(HighScore highScore);
 }

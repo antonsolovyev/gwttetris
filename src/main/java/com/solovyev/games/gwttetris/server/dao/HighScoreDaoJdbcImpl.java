@@ -6,30 +6,30 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 import com.solovyev.games.gwttetris.shared.HighScore;
 
-import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 
-public class HighScoreDaoImpl implements HighScoreDao
+public class HighScoreDaoJdbcImpl implements HighScoreDao
 {
-    private static final Logger logger = Logger.getLogger(HighScoreDaoImpl.class.getName());
-
-    private static final int MAX_HIGH_SCORE_RECORDS = 10;
+    private static final Logger logger = Logger.getLogger(HighScoreDaoJdbcImpl.class.getName());
 
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
-    public HighScoreDaoImpl(DataSource dataSource)
+    public HighScoreDaoJdbcImpl(DataSource dataSource)
     {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<HighScore> getHighScores()
     {
         List<HighScore> highScores = simpleJdbcTemplate.query(
@@ -60,6 +60,7 @@ public class HighScoreDaoImpl implements HighScoreDao
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isHighScore(Integer score)
     {
         Map<String, Object> map = simpleJdbcTemplate.queryForMap(
@@ -68,7 +69,7 @@ public class HighScoreDaoImpl implements HighScoreDao
         Integer min = (Integer) map.get("MIN");
 
         boolean res = false;
-        if ((count < MAX_HIGH_SCORE_RECORDS) || ((min != null) && (score > min)))
+        if ((count < MAX_HIGH_SCORE_RECORDS) || ((min != null) && (score >= min)))
         {
             res = true;
         }
@@ -77,6 +78,7 @@ public class HighScoreDaoImpl implements HighScoreDao
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void saveHighScore(HighScore highScore)
     {
         simpleJdbcTemplate.update("insert into high_score (name, score, date) values (?, ?, ?)",
