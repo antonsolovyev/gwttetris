@@ -91,13 +91,12 @@ public class HighScoreDaoDatastoreImpl implements HighScoreDao
     @Override
     public void saveHighScore(HighScore highScore)
     {
+        datastore.put(highScoreToEntity(highScore));
+
         Transaction transaction = datastore.beginTransaction();
         try
         {
-            datastore.put(highScoreToEntity(highScore));
-
             List<Entity> highScoreEntities = getHighScoreEntities();
-
             for (int i = highScoreEntities.size() - 1; i >= MAX_HIGH_SCORE_RECORDS; i--)
             {
                 datastore.delete(highScoreEntities.get(i).getKey());
